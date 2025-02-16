@@ -16,7 +16,14 @@ In this project, we propose a utility-based AI agent that predicts market trends
 
 # Methods Overview:
 ## Data Exploration
+![closepriceovertime](images/closepriceovertime.png)
+![trading_over_time](images/trading_over_time.png)
+![correlation_heatmap](images/correlation_heatmap.png)
+
 ## Data Preprocessing
+For preprocessing, not many changes were made to the data. We stripped the price values of the 'open', 'high', 'low', 'close', 'next_weeks_open' and 'next_weeks_close' columns in the dataframe of the dollar sign. We also used a placeholder median value for the slots with missing data.
+
+
 # Finalized dataframe:
 <img width="1236" alt="df" src="https://github.com/user-attachments/assets/1f019254-3e53-4a18-97dc-7753d36507bb" /><img width="436" alt="df-continue" src="https://github.com/user-attachments/assets/470dac6d-0715-4a46-8041-5e59e50bfc71" />
 
