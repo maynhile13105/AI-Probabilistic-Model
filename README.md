@@ -1,8 +1,8 @@
-## CSE 150A
+# CSE 150A Milestone 2
 
-## Dataset link: https://archive.ics.uci.edu/dataset/312/dow+jones+index
+## [Dataset link](https://archive.ics.uci.edu/dataset/312/dow+jones+index)
 
-## Jupyter Notebook link - https://colab.research.google.com/drive/1ysVW8dKDKrU8gJPSCyoAYanBV9dPKj4Y#scrollTo=nFW2Pt4iCL3a
+## [Jupyter Notebook](https://colab.research.google.com/drive/1ysVW8dKDKrU8gJPSCyoAYanBV9dPKj4Y#scrollTo=nFW2Pt4iCL3a)
 
 ## Group Members 
 Dat To Ung\
@@ -23,6 +23,6 @@ It takes in various market indicators and historical price data as inputs. \
 The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends. \
 \
 \
-Conclusion: \
+## Conclusion: \
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much.\ 
 Perhaps we would have to find an alternative method to clean the data instead of using placeholder values.
