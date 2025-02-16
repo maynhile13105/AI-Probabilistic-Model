@@ -35,9 +35,9 @@ In this project, we propose a utility-based AI agent that predicts market trends
 - next_weeks_close: the closing price of the stock in the following week
 - percent_change_next_weeks_price: the percentage change in price of the stock in the following week days_to_next_dividend: the number of days until the next dividend
 - percent_return_next_dividend: the percentage of return on the next dividend
-- PriceChange
-- VolumeChange
-- MarketTrend
+- PriceChange: categorizes percent_change_price as "Down" if it's below -1.5, "Up" if above 1.5, and "Stable" otherwise.
+- VolumeChange: follows the same logic but based on percent_change_volume_over_last_wk.
+- MarketTrend: determined using percent_change_next_weeks_price, labeling it as "Bearish" if below -1.5, "Bullish" if above 1.5, and "Neutral" otherwise.
 
 ## Model 1: Bayesian Network
 What is our agent doing in terms of PEAS?\
