@@ -22,7 +22,6 @@ Our agent is a Bayesian Network-based decision-making system that predicts stock
 It takes in various market indicators and historical price data as inputs. \
 The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends. \
 \
-\
-## Conclusion: \
+## Conclusion:
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much.\ 
 Perhaps we would have to find an alternative method to clean the data instead of using placeholder values.
