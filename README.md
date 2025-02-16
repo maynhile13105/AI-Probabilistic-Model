@@ -24,7 +24,11 @@ S (sensors): Using the stock market data from ucimlrepo and open/close prices, v
 Our agent is a Bayesian Network-based decision-making system that predicts stock price movements using probabilistic reasoning. \
 It takes in various market indicators and historical price data as inputs. \
 The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends. \
-\
+
+## Finalized dataframe:
+<img width="1236" alt="image" src="https://github.com/user-attachments/assets/1f019254-3e53-4a18-97dc-7753d36507bb" /><img width="398" alt="image" src="https://github.com/user-attachments/assets/470dac6d-0715-4a46-8041-5e59e50bfc71" />
+
+
 ## Conclusion:
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much.\ 
 Perhaps we would have to find an alternative method to clean the data instead of using placeholder values.
