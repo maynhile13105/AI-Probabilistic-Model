@@ -1,3 +1,5 @@
+# CSE 150A
+## Dataset: 
 What is our agent doing in terms of PEAS?\
 P (performance measure): How well does our model predict next week's stock price change?\
 E (environment): The market and stock data.\
