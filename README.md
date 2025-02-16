@@ -26,8 +26,25 @@ It takes in various market indicators and historical price data as inputs. \
 The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends. \
 
 ## Finalized dataframe:
-<img width="1236" alt="image" src="https://github.com/user-attachments/assets/1f019254-3e53-4a18-97dc-7753d36507bb" /><img width="398" alt="image" src="https://github.com/user-attachments/assets/470dac6d-0715-4a46-8041-5e59e50bfc71" />
+<img width="1236" alt="df" src="https://github.com/user-attachments/assets/1f019254-3e53-4a18-97dc-7753d36507bb" /><img width="1236" alt="df-continue" src="https://github.com/user-attachments/assets/470dac6d-0715-4a46-8041-5e59e50bfc71" />
 
+quarter:  the yearly quarter (1 = Jan-Mar; 2 = Apr=Jun).
+	stock: the stock symbol (see above)
+	date: the last business day of the work (this is typically a Friday)
+	open: the price of the stock at the beginning of the week
+	high: the highest price of the stock during the week
+	low: the lowest price of the stock during the week
+	close: the price of the stock at the end of the week
+	volume: the number of shares of stock that traded hands in the week
+	percent_change_price: the percentage change in price throughout the week
+	percent_chagne_volume_over_last_wek: the percentage change in the number of shares of 
+		stock that traded hands for this week compared to the previous week
+	previous_weeks_volume: the number of shares of stock that traded hands in the previous week
+	next_weeks_open: the opening price of the stock in the following week
+	next_weeks_close: the closing price of the stock in the following week
+	percent_change_next_weeks_price: the percentage change in price of the stock in the 
+		following week days_to_next_dividend: the number of days until the next dividend
+	percent_return_next_dividend: the percentage of return on the next dividend
 
 ## Conclusion:
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much.\ 
