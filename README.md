@@ -1,4 +1,16 @@
-# CSE 150A
+## CSE 150A
+
+## Dataset link: https://archive.ics.uci.edu/dataset/312/dow+jones+index
+
+## Jupyter Notebook link - https://colab.research.google.com/drive/1ysVW8dKDKrU8gJPSCyoAYanBV9dPKj4Y#scrollTo=nFW2Pt4iCL3a
+
+## Group Members 
+Dat To Ung\
+Hoang Le\
+Uyen Le\
+Yifan Zhu\
+Dylan Nguyen
+
 ## Dataset: 
 What is our agent doing in terms of PEAS?\
 P (performance measure): How well does our model predict next week's stock price change?\
