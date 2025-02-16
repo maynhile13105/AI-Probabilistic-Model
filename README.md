@@ -16,6 +16,8 @@ In this project, we propose a utility-based AI agent that predicts market trends
 
 # Methods Overview:
 ## Data Exploration
+![image](https://github.com/user-attachments/assets/de0f54e3-0ae0-449f-9ec5-3dc6b88f2275)
+
 ![closepriceovertime](images/closepriceovertime.png)
 ![trading_over_time](images/trading_over_time.png)
 ![correlation_heatmap](images/correlation_heatmap.png)
