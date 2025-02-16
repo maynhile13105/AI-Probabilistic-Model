@@ -21,7 +21,10 @@ In this project, we propose a utility-based AI agent that predicts market trends
 ![correlation_heatmap](images/correlation_heatmap.png)
 
 ## Data Preprocessing
-For preprocessing, not many changes were made to the data. We stripped the price values of the 'open', 'high', 'low', 'close', 'next_weeks_open' and 'next_weeks_close' columns in the dataframe of the dollar sign. We also used a placeholder median value for the slots with missing data.
+For data preprocessing, there are some missing values for 'percent_change_volume_over_last_wk' and 'previous_weeks_volume':
+![image](https://github.com/user-attachments/assets/c8058998-71ee-4295-86c7-6cf8271824ca)
+So we decided to fill in the missing values with the median of each type of stock. We also noticed that there are a lot of '$' signs in the data, so we decided to remove all the dollar signs ('$'). Finally, we added 3 more new columns which are 'PriceChange',	'VolumeChange', and 
+ 'MarketTrend'. The data for each of these columns is from converting the continuous values of 'percent_change_price', 'percent_change_next_weeks_price', and 'percent_change_volume_over_last_wk' to discrete values.  
 
 
 # Finalized dataframe:
