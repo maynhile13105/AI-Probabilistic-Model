@@ -82,7 +82,6 @@ The Bayesian Network models dependencies between these variables, forming condit
 
 # Code for model 1: 
 ```
-import random
 class BayesianNetwork:
     def __init__(self, nodes):
         self.nodes = nodes  # List of nodes (variables)
