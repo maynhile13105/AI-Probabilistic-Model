@@ -59,11 +59,13 @@ So we decided to fill in the missing values with the median of each type of stoc
 - MarketTrend: determined using percent_change_next_weeks_price, labeling it as "Bearish" if below -1.5, "Bullish" if above 1.5, and "Neutral" otherwise.
 
 ## Model 1: Bayesian Network
-What is our agent doing in terms of PEAS?\
+**What is our agent doing in terms of PEAS?**\
 P (performance measure): How well does our model predict next week's stock price change?\
 E (environment): The market and stock data.\
 A (actuators): Data processing, cleaning, and creating new attribute variables with the provided data.\
 S (sensors): Using the stock market data from ucimlrepo and open/close prices, volume, percent changes\
+**What is the “world” like?**\
+The agent operates in a financial market where stock prices fluctuate due to complex, often hidden factors. The world is uncertain and dynamic, meaning that the same market conditions may not always lead to identical outcomes. The agent must learn from past patterns to infer hidden market trends. y interpreting market shifts probabilistically, the agent aims to make informed trades that yield higher cumulative returns over time.\
 \
 Our agent is a Bayesian Network-based decision-making system that predicts stock price movements using probabilistic reasoning. \
 It takes in various market indicators and historical price data as inputs. \
