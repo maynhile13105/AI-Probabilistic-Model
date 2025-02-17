@@ -144,46 +144,8 @@ class BayesianNetwork:
         return 'Buy'
       else:
         return 'Hold'
-
-# Compute new CPTs per stock
-cpt_market_trend_per_stock = {}
-
-# Group data by stock and compute probabilities
-grouped = train_df.groupby("stock")
-
-for stock, stock_df in grouped:
-    # Compute joint frequency counts
-    joint_counts = stock_df.groupby(['VolumeChange', 'PriceChange', 'MarketTrend']).size()
-
-    # Compute conditional probabilities P(MarketTrend | VolumeChange, PriceChange)
-    cpt_stock = joint_counts.div(joint_counts.groupby(level=[0, 1]).transform('sum')).unstack().fillna(0).to_dict()
-    print(cpt_stock)
-    # Store CPT for this stock
-    cpt_market_trend_per_stock[stock] = cpt_stock
-
-# Display newly computed CPTs per stock
-cpt_market_trend_per_stock
-
-
-# Compute new CPTs per stock
-cpt_market_trend_per_stock = {}
-
-# Group data by stock and compute probabilities
-grouped = train_df.groupby("stock")
-
-for stock, stock_df in grouped:
-    # Compute joint frequency counts
-    joint_counts = stock_df.groupby(['VolumeChange', 'PriceChange', 'MarketTrend']).size()
-
-    # Compute conditional probabilities P(MarketTrend | VolumeChange, PriceChange)
-    cpt_stock = joint_counts.div(joint_counts.groupby(level=[0, 1]).transform('sum')).unstack().fillna(0).to_dict()
-    print(cpt_stock)
-    # Store CPT for this stock
-    cpt_market_trend_per_stock[stock] = cpt_stock
-
-# Display newly computed CPTs per stock
-cpt_market_trend_per_stock
 ```
+This model uses the dataset to compute the probability of each kind of Market Trend of each stock given the Volume Change (in categorical) and the Price Change (in categorical). Then, when the user gives the Volume and Price Change (in categorical) and asks the agent to suggest selling/buying/holding a stock, the model will try to find the market trend of this stock based on the probability and give the user a suggestion.
 # Results:
 ## Model 1: Bayesian Network
 
