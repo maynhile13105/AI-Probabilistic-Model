@@ -23,6 +23,7 @@ There are 30 types of stocks in our dataset with 750 rows.
 
 
 The below image is the descriptive of our dataset.
+
 ![image](https://github.com/user-attachments/assets/de0f54e3-0ae0-449f-9ec5-3dc6b88f2275)
 
 The below plot shows the closing prices of multiple stocks over time, demonstrating stable trends with moderate fluctuations. Some stocks have consistently higher values, while other stocks remain in lower price ranges.
