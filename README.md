@@ -18,6 +18,7 @@ In this project, we propose a utility-based AI agent that predicts market trends
 ## Data Exploration
 
 There are 30 types of stocks.
+
 ![image](https://github.com/user-attachments/assets/00ac8659-f2ac-4db8-b5d9-f27a19fa87ba)
 
 
