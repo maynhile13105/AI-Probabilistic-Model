@@ -78,6 +78,8 @@ It takes in various market indicators and historical price data as inputs. \
 The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends. 
 # Results:
 ## Model 1: Bayesian Network
+
+Currently, our agent only has 41.33% accuracy, which is not too high. One reason is that the dataset is not too big; it only has 750 rows of data and we also perform on a Naive Bayes model. There are still a lot of things to improve the accuracy of our agent. 
 # Conclusion:
 ## Model 1: Bayesian Network
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much. Perhaps we would have to find an alternative method to clean the data instead of using placeholder values.
