@@ -1,4 +1,5 @@
-# PROJECT CSE 150A: AI PROBABILISTIC MODELS - Milestone 2
+
+# PROJECT CSE 150A: AI PROBABILISTIC MODELS
 
 ## [Dataset link](https://archive.ics.uci.edu/dataset/312/dow+jones+index)
 
