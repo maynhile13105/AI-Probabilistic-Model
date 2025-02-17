@@ -145,7 +145,6 @@ class BayesianNetwork:
       else:
         return 'Hold'
 ```
-This model uses the dataset to compute the probability of each kind of Market Trend of each stock given the Volume Change (in categorical) and the Price Change (in categorical). Then, when the user gives the Volume and Price Change (in categorical) and asks the agent to suggest selling/buying/holding stock, the model will try to find the market trend of this stock based on the probability and give the user a suggestion.
 # Results:
 ## Model 1: Bayesian Network
 
