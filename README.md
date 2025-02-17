@@ -17,11 +17,12 @@ In this project, we propose a utility-based AI agent that predicts market trends
 # Methods Overview:
 ## Data Exploration
 
-There are 30 types of stocks.
+There are 30 types of stocks in our dataset with 750 rows. 
 
 ![image](https://github.com/user-attachments/assets/00ac8659-f2ac-4db8-b5d9-f27a19fa87ba)
 
 
+The below image is the descriptive of our dataset.
 ![image](https://github.com/user-attachments/assets/de0f54e3-0ae0-449f-9ec5-3dc6b88f2275)
 
 The below plot shows the closing prices of multiple stocks over time, demonstrating stable trends with moderate fluctuations. Some stocks have consistently higher values, while other stocks remain in lower price ranges.
