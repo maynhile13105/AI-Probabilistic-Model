@@ -84,9 +84,9 @@ The agent operates in a financial market where stock prices fluctuate due to com
 \
 Our agent is a Bayesian Network-based decision-making system that predicts stock price movements using probabilistic reasoning. \
 It takes in various market indicators and historical price data as inputs. \
-The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends. 
+The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends.\
 
-# Code for model 1: 
+**Code for model 1: **
 ```
 class BayesianNetwork:
     def __init__(self, nodes):
