@@ -77,6 +77,112 @@ The agent operates in a financial market where stock prices fluctuate due to com
 Our agent is a Bayesian Network-based decision-making system that predicts stock price movements using probabilistic reasoning. \
 It takes in various market indicators and historical price data as inputs. \
 The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends. 
+
+# Code for model 1: 
+```
+import random
+class BayesianNetwork:
+    def __init__(self, nodes):
+        self.nodes = nodes  # List of nodes (variables)
+        self.parents = {node: [] for node in nodes}  # Parent relationships
+        self.cpt = {}  # Store CPT per stock
+
+    def add_edge(self, parent, child):
+        """Define dependency relationships between nodes."""
+        self.parents[child].append(parent)
+
+    def set_cpt(self, stock, cpt):
+        """Set the conditional probability table, specific to a stock."""
+        if stock not in self.cpt:
+            self.cpt[stock] = {}
+        self.cpt[stock] = cpt
+
+    def get_probability(self, stock, evidence):
+        """Compute the probability of a node given the evidence and stock-specific CPT."""
+        if stock not in self.cpt:
+            return 1/3  # Return 1/3 probability if stock CPT is missing
+
+        # Compute conditional probability using Bayes' Theorem
+        key = tuple(evidence.values())
+        probabilities = {}
+        # If evidence is not in CPT, return 1/3 for each key of market trend
+        # Else return the {market_trend,P(market_trend|evidences)
+        if key not in self.cpt[stock]:
+          probabilities = {k: 1/3 for k in ['Low', 'High', 'Medium']}
+        else:
+          for k, p in self.cpt[stock][key].items():
+            probabilities[k] = p
+        return probabilities
+
+    def infer(self, stock, evidence):
+      """Perform inference to determine the most likely market trend for a given stock."""
+      probabilities = self.get_probability(stock, evidence)
+
+      # Get max probability value
+      max_prob = max(probabilities.values())
+
+      # Get all trends that share the max probability
+      best_trends = [k for k, v in probabilities.items() if v == max_prob]
+
+      if len(best_trends) == 3:
+          return 'Neutral'
+      elif len(best_trends) == 2:
+        if 'Bearish' in best_trends and 'Bullish' in best_trends:
+          return random.choice(best_trends)
+        elif 'Bearish' in best_trends and 'Neutral' in best_trends:
+          return 'Bearish'
+        else:
+          return 'Neutral'
+      else:
+          return best_trends[0]  # Return the single best trend
+
+    def suggested_decision(self, MarketTrend_pred):
+      if MarketTrend_pred == 'Bearish':
+        return 'Sell'
+      elif MarketTrend_pred == 'Bullish':
+        return 'Buy'
+      else:
+        return 'Hold'
+
+# Compute new CPTs per stock
+cpt_market_trend_per_stock = {}
+
+# Group data by stock and compute probabilities
+grouped = train_df.groupby("stock")
+
+for stock, stock_df in grouped:
+    # Compute joint frequency counts
+    joint_counts = stock_df.groupby(['VolumeChange', 'PriceChange', 'MarketTrend']).size()
+
+    # Compute conditional probabilities P(MarketTrend | VolumeChange, PriceChange)
+    cpt_stock = joint_counts.div(joint_counts.groupby(level=[0, 1]).transform('sum')).unstack().fillna(0).to_dict()
+    print(cpt_stock)
+    # Store CPT for this stock
+    cpt_market_trend_per_stock[stock] = cpt_stock
+
+# Display newly computed CPTs per stock
+cpt_market_trend_per_stock
+
+
+# Compute new CPTs per stock
+cpt_market_trend_per_stock = {}
+
+# Group data by stock and compute probabilities
+grouped = train_df.groupby("stock")
+
+for stock, stock_df in grouped:
+    # Compute joint frequency counts
+    joint_counts = stock_df.groupby(['VolumeChange', 'PriceChange', 'MarketTrend']).size()
+
+    # Compute conditional probabilities P(MarketTrend | VolumeChange, PriceChange)
+    cpt_stock = joint_counts.div(joint_counts.groupby(level=[0, 1]).transform('sum')).unstack().fillna(0).to_dict()
+    print(cpt_stock)
+    # Store CPT for this stock
+    cpt_market_trend_per_stock[stock] = cpt_stock
+
+# Display newly computed CPTs per stock
+cpt_market_trend_per_stock
+```
 # Results:
 ## Model 1: Bayesian Network
 
