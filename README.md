@@ -141,6 +141,7 @@ The data for each of these columns is from converting the continuous values of '
 
 ## Model 1: Bayesian Network
 **Overview**
+
 This model uses the dataset to compute the probability of each kind of Market Trend of each stock given the Volume Change (in categorical) and the Price Change (in categorical). Formula:
 
 $$
