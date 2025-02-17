@@ -67,3 +67,4 @@ The Bayesian Network models dependencies between these variables, forming condit
 # Conclusion:
 ## Model 1: Bayesian Network
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much. Perhaps we would have to find an alternative method to clean the data instead of using placeholder values.
+We can also improve our agent with a bigger dataset and more features. 
