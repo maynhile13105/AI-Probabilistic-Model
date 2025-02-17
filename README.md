@@ -18,8 +18,13 @@ In this project, we propose a utility-based AI agent that predicts market trends
 ## Data Exploration
 ![image](https://github.com/user-attachments/assets/de0f54e3-0ae0-449f-9ec5-3dc6b88f2275)
 
+The below plot shows the closing prices of multiple stocks over time, demonstrating stable trends with moderate fluctuations. Some stocks have consistently higher values, while other stocks remain in lower price ranges.
 ![closepriceovertime](images/closepriceovertime.png)
+\
+The plot illustrates trading volume variations over time, showing significant fluctuations for certain stocks. As you can see, some stocks experience periodic spikes.
 ![trading_over_time](images/trading_over_time.png)
+\
+The following heatmap visualizes the correlation between different stock-related features; red signifies positive correlation, blue signifies negative correlation, and white signifies no correlation.
 ![correlation_heatmap](images/correlation_heatmap.png)
 
 ## Data Preprocessing
