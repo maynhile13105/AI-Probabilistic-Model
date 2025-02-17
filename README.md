@@ -36,6 +36,7 @@ The following heatmap visualizes the correlation between different stock-related
 
 ## Data Preprocessing
 For data preprocessing, there are some missing values for 'percent_change_volume_over_last_wk' and 'previous_weeks_volume':
+
 ![image](https://github.com/user-attachments/assets/c8058998-71ee-4295-86c7-6cf8271824ca)
 
 So we decided to fill in the missing values with the median of each type of stock. We also noticed that there are a lot of '$' signs in the data, so we decided to remove all the dollar signs ('$'). Finally, we added 3 more new columns which are 'PriceChange',	'VolumeChange', and 
