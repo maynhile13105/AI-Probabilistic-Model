@@ -11,11 +11,11 @@ Uyen Le\
 Yifan Zhu\
 Dylan Nguyen
 
-# Project Abstraction: 
+## Project Abstraction: 
 In this project, we propose a utility-based AI agent that predicts market trends using a time-series dataset from UCI containing daily price data that was published on October 24th, 2014. Instead of performing a continuous-value regression on opening/closing prices or trading volume, we quantize these features into discrete intervals, by defining thresholds for small, medium, large price changes. This allows our agent to classify each day’s market behavior as “Up/Down/Stable” capturing directional trends rather than generating a single numeric forecast. Operating within the PEAS framework, the environment is the stock market, the performance measure is risk-adjusted profit, the actuators are buy/sell/hold trades, and the sensors are historical market observations. The agent continually updates its belief over market states and selects the action that maximizes expected returns under uncertainty. Through this probabilistic approach, we aim to demonstrate how interpreting and exploiting hidden market regimes can lead to more informed and adaptive trading strategies than a simple static predictor. In a regression task, we would just simply predict a numerical value such as the price of the stock or the percentage change in the price. But our task is different from a regression task in that our models will predict where the stock price will fall today. We want our model to detect the trends rather than the specific numbers. 
 
-# Methods Overview:
-## Data Exploration
+## Methods Overview:
+### Data Exploration
 
 There are 30 types of stocks in our dataset with 750 rows. 
 
@@ -35,16 +35,22 @@ The plot illustrates trading volume variations over time, showing significant fl
 The following heatmap visualizes the correlation between different stock-related features; red signifies positive correlation, blue signifies negative correlation, and white signifies no correlation.
 ![correlation_heatmap](images/correlation_heatmap.png)
 
-## Data Preprocessing
+### Data Preprocessing
+1.  Imputation:
+
 For data preprocessing, there are some missing values for 'percent_change_volume_over_last_wk' and 'previous_weeks_volume':
 
 ![image](https://github.com/user-attachments/assets/c8058998-71ee-4295-86c7-6cf8271824ca)
 
-So we decided to fill in the missing values with the median of each type of stock. We also noticed that there are a lot of '$' signs in the data, so we decided to remove all the dollar signs ('$'). Finally, we added 3 more new columns which are 'PriceChange',	'VolumeChange', and 
- 'MarketTrend'. The data for each of these columns is from converting the continuous values of 'percent_change_price', 'percent_change_next_weeks_price', and 'percent_change_volume_over_last_wk' to discrete values.  
+So we decided to fill in the missing values with the median of each type of stock. 
 
+2. Standardization
+ noticed that there are a lot of '$' signs in the data, so we decided to remove all the dollar signs ('$'). Finally, we added 3 more new columns which are 'PriceChange',	'VolumeChange', and 'MarketTrend'. 
 
-# Finalized dataframe:
+3. Feature expansion:
+The data for each of these columns is from converting the continuous values of 'percent_change_price', 'percent_change_next_weeks_price', and 'percent_change_volume_over_last_wk' to discrete values.  
+
+### Finalized dataframe:
 <img width="1236" alt="df" src="https://github.com/user-attachments/assets/1f019254-3e53-4a18-97dc-7753d36507bb" /><img width="436" alt="df-continue" src="https://github.com/user-attachments/assets/470dac6d-0715-4a46-8041-5e59e50bfc71" />
 
 - quarter: the yearly quarter (1 = Jan-Mar; 2 = Apr=Jun).
