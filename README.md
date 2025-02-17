@@ -146,11 +146,11 @@ class BayesianNetwork:
       else:
         return 'Hold'
 ```
-This model uses the dataset to compute the probability of each kind of Market Trend of each stock given the Volume Change (in categorical) and the Price Change (in categorical). Then, when the user gives the Volume and Price Change (in categorical) and asks the agent to suggest selling/buying/holding a stock, the model will try to find the market trend of this stock based on the probability and give the user a suggestion.
+This model uses the dataset to compute the probability of each kind of Market Trend of each stock given the Volume Change (in categorical) and the Price Change (in categorical). Then, when the user gives the Volume and Price Change (in categorical) and asks the agent to suggest selling/buying/holding stock, the model will try to find the market trend of this stock based on the probability and give the user a suggestion.
 # Results:
 ## Model 1: Bayesian Network
 
-Currently, our agent only has 41.33% accuracy, which is not too high. One reason is that the dataset is not too big; it only has 750 rows of data and we also perform on a Naive Bayes model. There are still a lot of things to improve the accuracy of our agent. 
+Currently, our agent only has 41.33% accuracy. We think this accuracy is not too high because we assumed that the price change and the volume change are independent. Also, when we converted the volume change, the price change, and the real market trend from numerical to categorical, we used the threshold is 1.5, which is not the most efficient for this model. We think we could improve our model if we have a larger dataset to train and test this model as well as we could try to figure out the most efficient threshold for standardizing. 
 # Conclusion:
 ## Model 1: Bayesian Network
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much. Perhaps we would have to find an alternative method to clean the data instead of using placeholder values.
