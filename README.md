@@ -1,4 +1,4 @@
-# PROJECT CSE 150A: AI PROBABILISTIC MODELS
+# PROJECT CSE 150A: AI PROBABILISTIC MODELS - Milestone 2
 
 ## [Dataset link](https://archive.ics.uci.edu/dataset/312/dow+jones+index)
 
@@ -11,8 +11,74 @@ Uyen Le\
 Yifan Zhu\
 Dylan Nguyen
 
+---
+
 ## Project Abstraction: 
 In this project, we propose a utility-based AI agent that predicts market trends using a time-series dataset from UCI containing daily price data that was published on October 24th, 2014. Instead of performing a continuous-value regression on opening/closing prices or trading volume, we quantize these features into discrete intervals, by defining thresholds for small, medium, large price changes. This allows our agent to classify each day’s market behavior as “Up/Down/Stable” capturing directional trends rather than generating a single numeric forecast. Operating within the PEAS framework, the environment is the stock market, the performance measure is risk-adjusted profit, the actuators are buy/sell/hold trades, and the sensors are historical market observations. The agent continually updates its belief over market states and selects the action that maximizes expected returns under uncertainty. Through this probabilistic approach, we aim to demonstrate how interpreting and exploiting hidden market regimes can lead to more informed and adaptive trading strategies than a simple static predictor. In a regression task, we would just simply predict a numerical value such as the price of the stock or the percentage change in the price. But our task is different from a regression task in that our models will predict where the stock price will fall today. We want our model to detect the trends rather than the specific numbers. 
+
+---
+
+## PEAS Framework  
+
+Our AI agent operates within the **PEAS framework** (Performance measure, Environment, Actuators, Sensors) as follows:  
+
+### **Performance Measure:**  
+The agent’s goal is to **predict market trends** to make optimal **buy/sell/hold** decisions rather than predicting explicit numeric forecasts. Success is measured by **risk-adjusted profit** based on:  
+- **Prediction accuracy** of classifying each day's market behavior as **Up/Down/Stable**.  
+- **Correct identification** of **bullish or bearish market regimes** over a given time frame.  
+- **Error in estimating the percentage change in price** for the next week (lower error is better).  
+
+### **Environment:**  
+The environment is the **stock market**, modeled using the **Dow Jones Index dataset from UCI**, containing daily price and volume data from 2014.  
+
+### **Actuators:**  
+The agent interacts with the market by executing **three possible trading actions**:  
+- **Buy** – Purchase stocks in anticipation of a price increase.  
+- **Sell** – Sell stocks to lock in profits or prevent losses.  
+- **Hold** – Maintain the current position when there is uncertainty.  
+
+### **Sensors:**  
+The agent gathers observations from **historical market data**, including **opening and closing prices, high and low prices, and trading volume**. These features are **quantized into discrete intervals** (e.g., small, medium, large price changes) to categorize daily market behavior as **Up, Down, or Stable**. The agent **continuously updates its belief over market states** based on these observations.  
+
+---
+
+## What is the “World” Like?  
+The agent operates in a **financial market** where stock prices fluctuate due to complex, often hidden factors. The world is **uncertain and dynamic**, meaning that the same market conditions may not always lead to identical outcomes. The agent must **learn from past patterns** to infer hidden market trends. By **interpreting market shifts probabilistically**, the agent aims to make informed trades that yield **higher cumulative returns** over time.  
+
+---
+
+## **Agent Type: Utility-Based AI Agent**  
+
+Our AI agent is a **utility-based agent** because it selects actions (**Buy/Sell/Hold**) based on **maximizing expected returns under uncertainty**. By predicting stock movements (**Up/Down/Stable**), it evaluates different actions using a **utility function** that considers **profitability, risk, and market conditions**.  
+
+Unlike a **goal-based agent** that focuses on achieving a fixed objective, our agent **compares the potential outcomes of different decisions** and chooses the one with the **highest expected reward**. This approach allows for **more adaptive and informed trading strategies** rather than relying on static predictions.  
+
+---
+
+## **Agent Setup and Probabilistic Modeling**  
+
+Our agent is designed as a **probabilistic classifier** that predicts **market trends** by analyzing **historical stock price movements**. Instead of using **continuous-value regression**, we **discretize price changes** into categories (**Up, Down, Stable**) and model the **probability distribution** of these outcomes.  
+
+### **Agent Setup:**  
+
+1. **Feature Engineering:**  
+   - We extract key **stock price features**: **opening price, closing price, highest price, lowest price, and trading volume**.  
+   - These features are **quantized into discrete intervals** representing **small, medium, or large changes** in price.  
+
+2. **Probabilistic Modeling Approach:**  
+   - The agent uses **probabilistic inference** to determine the **likelihood of market trends** given the **volume change and price change**.  
+   - It estimates **P(Trend | Market Features)**, where the **Trend** is **Up/Down/Stable**.  
+   - This allows the model to **infer hidden market regimes** and adjust predictions dynamically.  
+
+3. **Decision-Making:**  
+   - The agent selects **Buy/Sell/Hold** actions based on its **estimated probabilities**.  
+   - If **P(Up) is high**, the agent may **Buy**; if **P(Down) is high**, it may **Sell**; if **P(Stable)**, it may **Hold**.  
+   - This decision process **relies on probability distributions** rather than **deterministic rules**.  
+
+### **How It Fits in Probabilistic Modeling:**  
+Our agent applies **probabilistic classification** rather than **rule-based heuristics**. By **estimating the probability** of stock movements, it accounts for **uncertainty in financial markets** and avoids **overfitting to specific trends**. This makes it **more adaptable** compared to simple deterministic models.  
+
+---
 
 ## Methods Overview:
 ### Data Exploration
@@ -74,18 +140,6 @@ The data for each of these columns is from converting the continuous values of '
 - MarketTrend: determined using percent_change_next_weeks_price, labeling it as "Bearish" if below -1.5, "Bullish" if above 1.5, and "Neutral" otherwise.
 
 ## Model 1: Bayesian Network
-**What is our agent doing in terms of PEAS?**\
-P (performance measure): How well does our model predict next week's stock price change?\
-E (environment): The market and stock data.\
-A (actuators): Data processing, cleaning, and creating new attribute variables with the provided data.\
-S (sensors): Using the stock market data from ucimlrepo and open/close prices, volume, percent changes\
-**What is the “world” like?**\
-The agent operates in a financial market where stock prices fluctuate due to complex, often hidden factors. The world is uncertain and dynamic, meaning that the same market conditions may not always lead to identical outcomes. The agent must learn from past patterns to infer hidden market trends. y interpreting market shifts probabilistically, the agent aims to make informed trades that yield higher cumulative returns over time.\
-\
-Our agent is a Bayesian Network-based decision-making system that predicts stock price movements using probabilistic reasoning. \
-It takes in various market indicators and historical price data as inputs. \
-The Bayesian Network models dependencies between these variables, forming conditional probabilities to estimate the likelihood of different price trends.
-
 **Code**
 ```
 class BayesianNetwork:
