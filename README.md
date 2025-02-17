@@ -150,6 +150,7 @@ P(\text{MarketTrend}=y \mid \text{VolumeChange}=x_1, \text{PriceChange}=x_2) = \
 $$
 
 Then, when the user gives the Volume and Price Change (in categorical) and asks the agent to suggest selling/buying/holding stock, the model will try to find the market trend of this stock based on the probability and give the user a suggestion.
+
 **Code**
 ```
 class BayesianNetwork:
