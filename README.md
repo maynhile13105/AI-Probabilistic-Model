@@ -140,6 +140,14 @@ The data for each of these columns is from converting the continuous values of '
 - MarketTrend: determined using percent_change_next_weeks_price, labeling it as "Bearish" if below -1.5, "Bullish" if above 1.5, and "Neutral" otherwise.
 
 ## Model 1: Bayesian Network
+**Overview**
+This model uses the dataset to compute the probability of each kind of Market Trend of each stock given the Volume Change (in categorical) and the Price Change (in categorical). Formula:
+
+$$
+P(\text{MarketTrend}=y \mid \text{VolumeChange}=x_1, \text{PriceChange}=x_2) = \frac{\text{Number of } (\text{MarketTrend}=y, \text{VolumeChange}=x_1, \text{PriceChange}=x_2)}{\text{Number of } (\text{VolumeChange}=x_1, \text{PriceChange}=x_2)}
+$$
+
+Then, when the user gives the Volume and Price Change (in categorical) and asks the agent to suggest selling/buying/holding stock, the model will try to find the market trend of this stock based on the probability and give the user a suggestion.
 **Code**
 ```
 class BayesianNetwork:
