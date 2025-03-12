@@ -141,7 +141,7 @@ The data for each of these columns is from converting the continuous values of '
 - MarketTrend: determined using percent_change_next_weeks_price, labeling it as "Bearish" if below -1.5, "Bullish" if above 1.5, and "Neutral" otherwise.
 
 ## Model 1: Bayesian Network
-**Overview**
+# Overview
 
 This model uses the dataset to compute the probability of each kind of Market Trend of each stock given the Volume Change (in categorical) and the Price Change (in categorical). Formula:
 
@@ -151,7 +151,8 @@ $$
 
 Then, when the user gives the Volume and Price Change (in categorical) and asks the agent to suggest selling/buying/holding stock, the model will try to find the market trend of this stock based on the probability and give the user a suggestion.
 
-**Code**
+# Code
+**Agent Setup**
 ```
 class BayesianNetwork:
     def __init__(self, nodes):
@@ -215,6 +216,21 @@ class BayesianNetwork:
         return 'Buy'
       else:
         return 'Hold'
+```
+**Training**
+```
+# Training model
+# Define nodes: Market trend prediction
+nodes = ["MarketTrend", "VolumeChange", "PriceChange"]
+# Create Bayesian Network
+bn = BayesianNetwork(nodes)
+# Define dependencies
+bn.add_edge("VolumeChange", "MarketTrend")
+bn.add_edge("PriceChange", "MarketTrend")
+
+# Assign CPTs for each stock
+for stock, cpt in cpt_transformed.items():
+  bn.set_cpt(stock, cpt)
 ```
 # Results:
 
