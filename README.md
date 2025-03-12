@@ -225,6 +225,62 @@ The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that 
 ## Model 2: HMM Agent
 **Overview**
 **Code**
+```
+class HMM:
+    def __init__(self, states, init_prob, trans_prob, emit_prob):
+        self.states = states              # ['Bullish', 'Bearish', 'Neutral']
+        self.init_prob = init_prob        # Dictionary of initial probabilities
+        self.trans_prob = trans_prob      # Transition probabilities dictionary
+        self.emit_prob = emit_prob        # Emission probabilities dictionary
+
+
+    def viterbi(self, obs_seq, weights):
+        """
+        Runs the Viterbi algorithm on an observation sequence with weights.
+        obs_seq: list of observations (tuples)
+        weights: list of weights (one per observation)
+        Returns the most likely state sequence and the probability of that path.
+        """
+        V = [{}]  # V[t][state]: maximum log probability ending in state at time t.
+        path = {}
+
+        # Initialization: Use the weighted log emission probability.
+        for state in self.states:
+            emit = self.emit_prob.get(state, {}).get(obs_seq[0], 1e-6)
+            V[0][state] = np.log(self.init_prob.get(state, 1e-6) + 1e-12) + weights[0] * np.log(emit + 1e-12)
+            path[state] = [state]
+
+        # Recursion: For each subsequent observation.
+        for t in range(1, len(obs_seq)):
+            V.append({})
+            new_path = {}
+            for curr_state in self.states:
+                max_prob, best_prev = max(
+                    (
+                        V[t-1][prev_state] +
+                        weights[t] * (np.log(self.trans_prob.get(prev_state, {}).get(curr_state, 1e-6) + 1e-12) +
+                                      np.log(self.emit_prob.get(curr_state, {}).get(obs_seq[t], 1e-6) + 1e-12)),
+                        prev_state
+                    )
+                    for prev_state in self.states
+                )
+                V[t][curr_state] = max_prob
+                new_path[curr_state] = path[best_prev] + [curr_state]
+            path = new_path
+
+        final_state = max(V[-1], key=V[-1].get)
+        return path[final_state], np.exp(V[-1][final_state])
+
+    def suggest_action(self, state):
+        """Suggests a trading action based on the predicted hidden state."""
+        if state == 'Bullish':
+            return 'Buy'
+        elif state == 'Bearish':
+            return 'Sell'
+        else:
+            return 'Hold'
+
+```
 # Results:
 # Conclusion:
 The prediction accuracy of our Hidden Markov Model is 35%, suggesting that the model makes a slight improvement over guessing market trends at random. One possible reason for this limited performance is, again, the reliance on a relatively small dataset and placeholder values, which can introduce biases and prevent the model from making accurately estimations. Increasing the size and quality of the dataset could significantly enhance the reliability of these probability estimates, ultimately leading to better predictions.\
