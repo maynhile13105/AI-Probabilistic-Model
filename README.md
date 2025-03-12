@@ -254,6 +254,30 @@ P(S_{1:T}, O_{1:T})
 = \pi_{S_1} \, b_{S_1}(O_1)
 \prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} \, b_{S_t}(O_t)\bigr).
 $$
+
+## Model variables and structure interactions
+### Structure
+- ***Hidden states:*** Market trend ("Bullish", "Bearish", "Neutral")
+- ***Observations***: Pair of PriceChange and VolumeChange
+- ***Initial Probabilities `init_prob`***: represent the probability of each state at the beginning. This kind of probability is computed by finding the frequency of each state `s` in the training data
+  
+$$
+\pi(s)=\frac{Number\ of\ s}{Total\ number\ of\ observations}
+$$
+
+- ***Transition Probabilities `trans_prob`***: represent the probability of the transition from state $s_i$ to state $s_j$. This kind of probability is computed by counting consecutive occurrences of market trends in the training set.
+
+$$
+P(s_j \mid s_i) = \frac{\text{Count}(s_i \to s_j)}{\sum_{s'} \text{Count}(s_i \to s')}
+$$
+
+- ***Emission Probabilities `emit_prob`***: represent the probability distribution over the possible observations. This is computed by counting the frequency of the appearances of state `s` and each tuple ($o_1,o_2$) (represents for tuple (PriceChange, VolumeChange))
+  
+$$
+P(o_1,o_2 \mid s) = \frac{Count(s,o_1,o_2)}{Total count of observations in state s}
+$$
+
+
 # Code
 **Agent Setup**
 ```
