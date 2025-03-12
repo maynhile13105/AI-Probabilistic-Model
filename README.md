@@ -241,6 +241,19 @@ The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that 
 ## Model 2: HMM Agent
 # Overview
 This model uses a Hidden Markov Model (HMM) to capture the temporal dependencies in stock market behavior. We define three hidden states—Bullish, Bearish, and Neutral—to represent the underlying market conditions, and we estimate the transition probabilities between these states based on historical data. We also compute emission probabilities that describe how likely we are to observe certain price and volume changes when the market is in a particular hidden state. Once the HMM is trained, it uses these transition and emission probabilities to infer the most probable sequence of hidden states for any new set of observed price and volume changes. Based on the inferred market state, the agent then provides a recommendation to buy, sell, or hold the stock.
+Formally, let $$\(S_t\)$$ denote the hidden state at time $$\(t\)$$ and $$\(O_t\)$$ the observation (price change and volume change) at time $$\(t\)$$. We specify three key components:
+
+- The initial state distribution $$\pi_i = P(S_1 = i)$$
+- The transition probabilities $$a_{ij}$$ = $$P(S_{t+1}$$ = $$j \mid S_t = i)$$
+- The emission probabilities $$b_i(O_t)$$ = $$P(O_t \mid S_t = i)$$
+
+The joint probability of a sequence of hidden states $$\(S_{1:T}\)$$ and observations $$\(O_{1:T}\)$$ is given by:
+
+$$
+P(S_{1:T}, O_{1:T})
+= \pi_{S_1} \, b_{S_1}(O_1)
+\prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} \, b_{S_t}(O_t)\bigr).
+$$
 # Code
 **Agent Setup**
 ```
