@@ -239,8 +239,9 @@ Currently, our agent only has 41.33% accuracy. We think this accuracy is not too
 
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much. Perhaps we would have to find an alternative method to clean the data instead of using placeholder values.  We can also improve our agent with a bigger dataset and more features. Our agent can have more historical stock data with more data in our dataset. With the improvement of the historical stock data, the agent can calculate the probability more accurately and more reliably. Improving our features would also make our agent more reliable because our current agent is oversimplifying the market dynamic by assuming the price change and volume change are independent. By having more features, we can improve our agent’s structure which also boosts the accuracy of our agent. There are many challenges that our agent can have, one of them is the independence assumption. Since this is our first agent, we are assuming the volume change and the price change are independent. But in the real world, these features are correlated, and ignoring the relationship can lead to the underperformance of our agent. With the limitation of our dataset, our agent will be overfitting and have bad predictions, which can lead to poor decision-making. Also, using a fixed threshold is not optimal for all types of stocks, which can also lead to bad output for our agent.
 ## Model 2: HMM Agent
-**Overview**
-**Code**
+# Overview
+# Code
+**Agent Setup**
 ```
 class HMM:
     def __init__(self, states, init_prob, trans_prob, emit_prob):
@@ -296,6 +297,53 @@ class HMM:
         else:
             return 'Hold'
 
+```
+**Training**
+```
+# Dictionary to store HMM parameters for each stock
+hmm_params = {}
+# Training model
+for stock in stocks:
+    stock_df = df[df['stock'] == stock].sort_values('date')
+    n = len(stock_df)
+    train_size = int(np.floor(n * 0.8))
+    training_data = stock_df.iloc[:train_size]
+
+    # Compute initial probabilities from the distribution of MarketTrend in training data.
+    overall_counts = training_data['MarketTrend'].value_counts().to_dict()
+    total_overall = sum(overall_counts.values())
+    init_prob = {state: count / total_overall for state, count in overall_counts.items()}
+
+    # Compute transition probabilities based on consecutive MarketTrend values.
+    trans_counts = defaultdict(lambda: defaultdict(int))
+    market_trends = training_data['MarketTrend'].tolist()
+    for i in range(len(market_trends) - 1):
+        current_state = market_trends[i]
+        next_state = market_trends[i + 1]
+        trans_counts[current_state][next_state] += 1
+    trans_prob = {}
+    for state, next_counts in trans_counts.items():
+        total = sum(next_counts.values())
+        trans_prob[state] = {s: count / total for s, count in next_counts.items()}
+
+    # Compute emission probabilities for each state using observed (PriceChange, VolumeChange) tuples.
+    emit_counts = defaultdict(lambda: defaultdict(int))
+    for _, row in training_data.iterrows():
+        state = row['MarketTrend']
+        obs = (row['PriceChange'], row['VolumeChange'])
+        emit_counts[state][obs] += 1
+    emit_prob = {}
+    for state, obs_counts in emit_counts.items():
+        total = sum(obs_counts.values())
+        emit_prob[state] = {obs: count / total for obs, count in obs_counts.items()}
+
+    # Save the parameters and the training size for the current stock.
+    hmm_params[stock] = {
+        'init_prob': init_prob,
+        'trans_prob': trans_prob,
+        'emit_prob': emit_prob,
+        'train_size': train_size
+    }
 ```
 # Results:
 # Conclusion:
