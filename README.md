@@ -245,14 +245,14 @@ Formally, let $$\(S_t\)$$ denote the hidden state at time $$\(t\)$$ and $$\(O_t\
 
 - The initial state distribution $$\pi_i = P(S_1 = i)$$
 - The transition probabilities $$a_{ij}$$ = $$P(S_{t+1}$$ = $$j \mid S_t = i)$$
-- The emission probabilities $$b_i(O_t)$$ = $$P(O_t \mid S_t = i)$$
+- The emission probabilities $$b_{i(O_t)}$$ = $$P(O_t \mid S_t = i)$$
 
 The joint probability of a sequence of hidden states $$\(S_{1:T}\)$$ and observations $$\(O_{1:T}\)$$ is given by:
 
 $$
 P(S_{1:T} O_{1:T})
-= \pi_{S_1} \, b_{S_1}(O_1)
-\prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} \, b_{S_t}(O_t)\bigr).
+= \pi_{S_1} b_{{S_1}(O_1)}
+\prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} \, b_{{S_t}(O_t)}\bigr).
 $$
 
 ## Model variables and structure interactions
