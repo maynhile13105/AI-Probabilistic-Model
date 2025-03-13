@@ -257,7 +257,7 @@ $$
 
 ## Model variables and structure interactions
 ### Structure
-- ***Hidden states:*** Market trend ("Bullish", "Bearish", "Neutral")
+- ***Hidden states `states`:*** Market trend ("Bullish", "Bearish", "Neutral")
 - ***Observations***: Pair of PriceChange and VolumeChange
 - ***Initial Probabilities `init_prob`***: represent the probability of each state at the beginning. This kind of probability is computed by finding the frequency of each state `s` in the training data
   
@@ -272,11 +272,33 @@ P(s_j \mid s_i) = \frac{\text{Count}(s_i \to s_j)}{\sum_{s'} \text{Count}(s_i \t
 $$
 
 - ***Emission Probabilities `emit_prob`***: represent the probability distribution over the possible observations. This is computed by counting the frequency of the appearances of state `s` and each tuple ($o_1,o_2$) (represents for tuple (PriceChange, VolumeChange))
-  
+
 $$
 P(o_1,o_2 \mid s) = \frac{Count(s,o_1,o_2)}{Total count of observations in state s}
 $$
 
+## Interations and Algorithms (Model Analysis)
+
+- ***Constructor***: Initialize value of `states`, `init_prob`, `trans_prob` and `emit_prob`
+
+- ***Viterbi Algorithm***: Infer the most probable sequence of hidden states.
+
+  In this algorithm, first of all, we computed the weight log probability in the first observation using the formula below:
+
+$$
+V[0][s] = \log(\pi(s) + \epsilon) + w_0 \times \log\big(P(o_0 \mid s) + \epsilon\big)
+$$
+where: $\epsilon = 1e-12$ is the small value to avoid log(0) and $w_0$ is the weight of the first observation
+
+Then, for each subsequent observation $o_t$ with weight $w_t$, evaluate each possible previous state $s_i$ and update to the one that we can get the maximum probability of reaching the current state $s_j$, using the formula below:
+
+$$
+V[t][s_j] = \max_{s_i} \left\{ V[t-1][s_i] + w_t \times \left( \log\big(P(s_j \mid s_i) + \epsilon\big) + \log\big(P(o_t \mid s_j) + \epsilon\big) \right) \right\}
+$$
+
+All the possible sequences of states are stored in a dictionary. The algorithm will trace back from the state with the highest probability at the final time t.
+
+- ***Action Suggestion***: As model 1, this method is used to return an action suggestion which depends on the predicted future hidden states.
 
 # Code
 **Agent Setup**
