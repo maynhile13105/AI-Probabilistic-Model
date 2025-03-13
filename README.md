@@ -250,7 +250,7 @@ Formally, let $$\(S_t\)$$ denote the hidden state at time $$\(t\)$$ and $$\(O_t\
 The joint probability of a sequence of hidden states $$\(S_{1:T}\)$$ and observations $$\(O_{1:T}\)$$ is given by:
 
 $$
-P(S_{1:T}, O_{1:T})
+P(S_{1:T} O_{1:T})
 = \pi_{S_1} \, b_{S_1}(O_1)
 \prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} \, b_{S_t}(O_t)\bigr).
 $$
@@ -426,3 +426,8 @@ Another limitation arises from the Markov assumption itself, which says that the
 # Results:
 
 # Conclusion:
+
+
+
+## Citation: 
+For this project, we did use ChatGPT to help us with the ideas for the coding parts. We asked ChatGPT to give us the ideas, and sample code so that we can implement our code based on the code samples. Also, there are some formulas that we think.
