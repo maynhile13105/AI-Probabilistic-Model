@@ -424,23 +424,8 @@ In the next model, we will use reinforcement learning to improve our decision-ma
 
 ## Model 3: Reinforcement Learning Agent
 # Overview
-This model builds upon the standard HMM method used in Model 2 with three hidden states but introduces weighted log-likelihood calculations to improve market trend prediction. The advantage of Model 3 is to assign different levels of importance to different observations, so that it could better handle the market fluctuation. Unlike the standard HMM for Model 2, which treats all observations equally and relies on standard Maximum Likelihood Estimation (MLE), this Weighted HMM allows us to adjust the contribution of specific observations when computing transition and emission probabilities. By doing so, it combined domain knowledge about the significance of different market conditions, refining its trading recommendations. This can be useful when some trading days, such as those with high fluctuation or large trading volume, carry more predictive power than others.
 
-Formally, let $$\(S_t\)$$ denote the hidden state at time $$\(t\)$$ and $$\(O_t\)$$ the observation (price change and volume change) at time $$\(t\)$$. We specify three key components similar as Model 2:
 
-- The initial state distribution $$\pi_i = P(S_1 = i)$$
-- The **weighted** transition probabilities $$a_{ij}$$ = $$P(S_{t+1}$$ = $$j \mid S_t = i)$$, with higher weights for higher market fluctuation.
-- The **weighted** emission probabilities $$b_{i(O_t)}$$ = $$P(O_t \mid S_t = i)$$, with higher weights for major price and volume changes.
-
-The joint probability of a sequence of hidden states $$\(S_{1:T}\)$$ and observations $$\(O_{1:T}\)$$ is also modified as:
-
-$$
-P(S_{1:T} \, O_{1:T})
-= \pi_{S_1} b_{{S_1}(O_1)}
-\prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t}^{w_t} b_{{S_t}(O_t)}^{w_t}\bigr).
-$$
-
-where $w_t$ represents the weight applied to each observation at time $t$. Adding these weights allows for adaptive learning, ensuring that significant events (e.g. earnings reports, economic announcements) receive higher influence in the model's decision-making.
 
 ## Model variables and structure interactions
 
