@@ -264,7 +264,7 @@ $$
 - Volume Change: The observation 1
 - Price Change: The observation 2
   
-![image](https://github.com/user-attachments/assets/53ac6b78-65bd-4aae-b01d-55249aa0e097)
+![image](https://github.com/user-attachments/assets/70a2bd1a-9ca1-4d76-9366-dbc8d698565a)
 
 ### Structure
 - ***Hidden states `states`:*** Market trend ("Bullish", "Bearish", "Neutral")
