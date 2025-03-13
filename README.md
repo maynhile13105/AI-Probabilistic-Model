@@ -256,6 +256,17 @@ P(S_{1:T} \, O_{1:T})
 $$
 
 ## Model variables and structure interactions
+
+### Data Exploration
+- Stock: Identify the specific stock
+- Market Trend: Hidden state in model
+- Date: Time in sequence
+- Volume Change: The observation 1
+- Price Change: The observation 2
+  
+![image](https://github.com/user-attachments/assets/7ef2564c-e216-47f3-b2fe-c346798de16b)
+
+
 ### Structure
 - ***Hidden states `states`:*** Market trend ("Bullish", "Bearish", "Neutral")
 - ***Observations***: Pair of PriceChange and VolumeChange
