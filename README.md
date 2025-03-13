@@ -284,16 +284,17 @@ $$
 - ***Viterbi Algorithm***: Infer the most probable sequence of hidden states.
 
   In this algorithm, first of all, we computed the weight log probability in the first observation using the formula below:
-
+  
 $$
 V[0][s] = \log(\pi(s) + \epsilon) + w_0 \times \log\big(P(o_0 \mid s) + \epsilon\big)
 $$
+
 where: $\epsilon = 1e-12$ is the small value to avoid log(0) and $w_0$ is the weight of the first observation
 
 Then, for each subsequent observation $o_t$ with weight $w_t$, evaluate each possible previous state $s_i$ and update to the one that we can get the maximum probability of reaching the current state $s_j$, using the formula below:
 
 $$
-V[t][s_j] = \max_{s_i} \left\{ V[t-1][s_i] + w_t \times \left( \log\big(P(s_j \mid s_i) + \epsilon\big) + \log\big(P(o_t \mid s_j) + \epsilon\big) \right) \right\}
+V[t][s_j] = \max_{s_i} \big[  V[t-1][s_i] + w_t \times \big(\log(P(s_j \mid s_i) + \epsilon) + \log(P(o_t \mid s_j) + \epsilon)\big) \big]
 $$
 
 All the possible sequences of states are stored in a dictionary. The algorithm will trace back from the state with the highest probability at the final time t.
