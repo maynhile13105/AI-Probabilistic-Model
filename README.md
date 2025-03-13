@@ -430,4 +430,4 @@ Another limitation arises from the Markov assumption itself, which says that the
 
 
 ## Citation: 
-For this project, we did use ChatGPT to help us with the ideas for the coding parts. We asked ChatGPT to give us the ideas, and sample code so that we can implement our code based on the code samples. We asked 
+For this project, we used ChatGPT to help us understand the Viterbi algorithm used in the HMM model. We also used ChatGPT to check our formulas for the joint probability of the sequence of hidden states and observation of the HMM model. We also used ChatGPT to check our syntax in the coding parts.  
