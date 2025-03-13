@@ -261,20 +261,18 @@ $$
 - ***Observations***: Pair of PriceChange and VolumeChange
 - ***Initial Probabilities `init_prob`***: represent the probability of each state at the beginning. This kind of probability is computed by finding the frequency of each state `s` in the training data
   
-$$
-\pi(s)=\frac{Number\ of\ s}{Total\ number\ of\ observations}
-$$
+$$\verb|init_prob[s]| = \pi(s) = \frac{\text{Number of } s}{\text{Total number of observations}}$$
 
 - ***Transition Probabilities `trans_prob`***: represent the probability of the transition from state $s_i$ to state $s_j$. This kind of probability is computed by counting consecutive occurrences of market trends in the training set.
 
 $$
-P(s_j \mid s_i) = \frac{\text{Count}(s_i \to s_j)}{\sum_{s'} \text{Count}(s_i \to s')}
+\verb|trans\_prob[s_i][s_j]| = P(s_j \mid s_i) = \frac{\text{Count}(s_i \to s_j)}{\sum_{s'} \text{Count}(s_i \to s')}
 $$
 
-- ***Emission Probabilities `emit_prob`***: represent the probability distribution over the possible observations. This is computed by counting the frequency of the appearances of state `s` and each tuple ($o_1,o_2$) (represents for tuple (PriceChange, VolumeChange))
+- ***Emission Probabilities `emit_prob`***: represent the probability distribution over the possible observations. This is computed by counting the frequency of the appearances of state `s` and each tuple ($o_1,o_2$) as `o`(represents for tuple (PriceChange, VolumeChange))
 
 $$
-P(o_1,o_2 \mid s) = \frac{Count(s,o_1,o_2)}{Total count of observations in state s}
+\verb|emit\_prob[s][o]| = P(o \mid s) = \frac{Count(s,o)}{Total count of observations in state s}
 $$
 
 ### Interations and Algorithms (Model Analysis)
