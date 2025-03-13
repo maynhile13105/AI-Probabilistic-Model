@@ -424,19 +424,190 @@ In the next model, we will use reinforcement learning to improve our decision-ma
 
 ## Model 3: Reinforcement Learning Agent
 # Overview
+This model builds upon the standard HMM method used in Model 2 with three hidden states but introduces weighted log-likelihood calculations to improve market trend prediction. The advantage of Model 3 is to assign different levels of importance to different observations, so that it could better handle the market fluctuation. Unlike the standard HMM for Model 2, which treats all observations equally and relies on standard Maximum Likelihood Estimation (MLE), this Weighted HMM allows us to adjust the contribution of specific observations when computing transition and emission probabilities. By doing so, it combined domain knowledge about the significance of different market conditions, refining its trading recommendations. This can be useful when some trading days, such as those with high fluctuation or large trading volume, carry more predictive power than others.
 
+Formally, let $$\(S_t\)$$ denote the hidden state at time $$\(t\)$$ and $$\(O_t\)$$ the observation (price change and volume change) at time $$\(t\)$$. We specify three key components similar as Model 2:
+
+- The initial state distribution $$\pi_i = P(S_1 = i)$$
+- The **weighted** transition probabilities $$a_{ij}$$ = $$P(S_{t+1}$$ = $$j \mid S_t = i)$$, with higher weights for higher market fluctuation.
+- The **weighted** emission probabilities $$b_{i(O_t)}$$ = $$P(O_t \mid S_t = i)$$, with higher weights for major price and volume changes.
+
+The joint probability of a sequence of hidden states $$\(S_{1:T}\)$$ and observations $$\(O_{1:T}\)$$ is also modified as:
+
+$$
+P(S_{1:T} \, O_{1:T})
+= \pi_{S_1} b_{{S_1}(O_1)}
+\prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t}^{w_t} b_{{S_t}(O_t)}^{w_t}\bigr).
+$$
+
+where $w_t$ represents the weight applied to each observation at time $t$. Adding these weights allows for adaptive learning, ensuring that significant events (e.g. earnings reports, economic announcements) receive higher influence in the model's decision-making.
 
 ## Model variables and structure interactions
+
+### Data Exploration
+- Stock: Identify the specific stock
+- Market Trend: Hidden state in model
+- Date: Time in sequence
+- Volume Change: The observation 1
+- Price Change: The observation 2
+  
+![image](https://github.com/user-attachments/assets/70a2bd1a-9ca1-4d76-9366-dbc8d698565a)
+
 ### Structure
+- ***Hidden states `states`:*** Market trend ("Bullish", "Bearish", "Neutral")
+- ***Observations***: Pair of PriceChange and VolumeChange
+- ***Initial Probabilities `init_prob`***: represent the probability of each state at the beginning. This kind of probability is computed by finding the frequency of each state `s` in the training data
+  
+$$\verb|init_prob[s]| = \pi(s) = \frac{\text{Number of } s}{\text{Total observations}}$$
+
+- ***Transition Probabilities `trans_prob`***: represent the probability of the transition from state $s_i$ to state $s_j$. This kind of probability is computed by counting consecutive occurrences of market trends in the training set.
+
+$$
+\verb|trans\_prob[s_i][s_j]| = P(s_j \mid s_i) = \frac{\text{Count}(s_i \to s_j)}{\sum_{s'} \text{Count}(s_i \to s')}
+$$
+
+- ***Emission Probabilities `emit_prob`***: represent the probability distribution over the possible observations. This is computed by counting the frequency of the appearances of state `s` and each tuple ($o_1,o_2$) as `o`(represents for tuple (PriceChange, VolumeChange))
+
+$$
+\verb|emit\_prob[s][o]| = P(o \mid s) = \frac{Count(s,o)}{\text{Total observations in state s}}
+$$
 
 ### Interations and Algorithms (Model Analysis)
 
-# Code
+- ***Constructor***: Initialize value of `states`, `init_prob`, `trans_prob` and `emit_prob`
 
+- ***Viterbi Algorithm***: Infer the most probable sequence of hidden states.
+
+  In this algorithm, first of all, we computed the weight log probability in the first observation using the formula below:
+  
+$$
+V[0][s] = \log(\pi(s) + \epsilon) + w_0 \times \log\big(P(o_0 \mid s) + \epsilon\big)
+$$
+
+   where: $\epsilon = 1e-12$ is the small value to avoid log(0) and $w_0$ is the weight of the first observation
+
+   Then, for each subsequent observation $o_t$ with weight $w_t$, evaluate each possible previous state $s_i$ and update to the one that we can get the maximum probability of reaching the current state $s_j$, using the formula below:
+
+$$
+V[t][s_j] = \max_{s_i} \big[  V[t-1][s_i] + w_t \times \big(\log(P(s_j \mid s_i) + \epsilon) + \log(P(o_t \mid s_j) + \epsilon)\big) \big]
+$$
+
+All the possible sequences of states are stored in a dictionary. The algorithm will trace back from the state with the highest probability at the final time t.
+
+- ***Action Suggestion***: As model 1, this method is used to return an action suggestion which depends on the predicted future hidden states.
+
+# Code
+**Agent Setup**
+```
+class HMM:
+    def __init__(self, states, init_prob, trans_prob, emit_prob):
+        self.states = states              # ['Bullish', 'Bearish', 'Neutral']
+        self.init_prob = init_prob        # Dictionary of initial probabilities
+        self.trans_prob = trans_prob      # Transition probabilities dictionary
+        self.emit_prob = emit_prob        # Emission probabilities dictionary
+
+
+    def viterbi(self, obs_seq, weights):
+        """
+        Runs the Viterbi algorithm on an observation sequence with weights.
+        obs_seq: list of observations (tuples)
+        weights: list of weights (one per observation)
+        Returns the most likely state sequence and the probability of that path.
+        """
+        V = [{}]  # V[t][state]: maximum log probability ending in state at time t.
+        path = {}
+
+        # Initialization: Use the weighted log emission probability.
+        for state in self.states:
+            emit = self.emit_prob.get(state, {}).get(obs_seq[0], 1e-6)
+            V[0][state] = np.log(self.init_prob.get(state, 1e-6) + 1e-12) + weights[0] * np.log(emit + 1e-12)
+            path[state] = [state]
+
+        # Recursion: For each subsequent observation.
+        for t in range(1, len(obs_seq)):
+            V.append({})
+            new_path = {}
+            for curr_state in self.states:
+                max_prob, best_prev = max(
+                    (
+                        V[t-1][prev_state] +
+                        weights[t] * (np.log(self.trans_prob.get(prev_state, {}).get(curr_state, 1e-6) + 1e-12) +
+                                      np.log(self.emit_prob.get(curr_state, {}).get(obs_seq[t], 1e-6) + 1e-12)),
+                        prev_state
+                    )
+                    for prev_state in self.states
+                )
+                V[t][curr_state] = max_prob
+                new_path[curr_state] = path[best_prev] + [curr_state]
+            path = new_path
+
+        final_state = max(V[-1], key=V[-1].get)
+        return path[final_state], np.exp(V[-1][final_state])
+
+    def suggest_action(self, state):
+        """Suggests a trading action based on the predicted hidden state."""
+        if state == 'Bullish':
+            return 'Buy'
+        elif state == 'Bearish':
+            return 'Sell'
+        else:
+            return 'Hold'
+
+```
+**Training**
+```
+# Dictionary to store HMM parameters for each stock
+hmm_params = {}
+# Training model
+for stock in stocks:
+    stock_df = df[df['stock'] == stock].sort_values('date')
+    n = len(stock_df)
+    train_size = int(np.floor(n * 0.8))
+    training_data = stock_df.iloc[:train_size]
+
+    # Compute initial probabilities from the distribution of MarketTrend in training data.
+    overall_counts = training_data['MarketTrend'].value_counts().to_dict()
+    total_overall = sum(overall_counts.values())
+    init_prob = {state: count / total_overall for state, count in overall_counts.items()}
+
+    # Compute transition probabilities based on consecutive MarketTrend values.
+    trans_counts = defaultdict(lambda: defaultdict(int))
+    market_trends = training_data['MarketTrend'].tolist()
+    for i in range(len(market_trends) - 1):
+        current_state = market_trends[i]
+        next_state = market_trends[i + 1]
+        trans_counts[current_state][next_state] += 1
+    trans_prob = {}
+    for state, next_counts in trans_counts.items():
+        total = sum(next_counts.values())
+        trans_prob[state] = {s: count / total for s, count in next_counts.items()}
+
+    # Compute emission probabilities for each state using observed (PriceChange, VolumeChange) tuples.
+    emit_counts = defaultdict(lambda: defaultdict(int))
+    for _, row in training_data.iterrows():
+        state = row['MarketTrend']
+        obs = (row['PriceChange'], row['VolumeChange'])
+        emit_counts[state][obs] += 1
+    emit_prob = {}
+    for state, obs_counts in emit_counts.items():
+        total = sum(obs_counts.values())
+        emit_prob[state] = {obs: count / total for obs, count in obs_counts.items()}
+
+    # Save the parameters and the training size for the current stock.
+    hmm_params[stock] = {
+        'init_prob': init_prob,
+        'trans_prob': trans_prob,
+        'emit_prob': emit_prob,
+        'train_size': train_size
+    }
+```
 # Results:
 Our Reinforcement Learning Model agent achieved an overall accuracy of 42%, slightly outperforming the Hidden Markov Model and the Bayesian Network agents. This indicates that the model is also capable of capturing some aspects of the market’s behavior, though it can be improved upon. A potential factor contributing to the modest accuracy is the limited state representation, relying only on price and volume changes, which may not fully capture the complexity of market trends. Additionally, the model’s performance could be affected by the relatively small dataset and the fixed hyperparameters, such as learning rate, discount factor, and exploration rate, which may not be optimal across different stocks. Further improvements could be achieved by expanding the feature set, fine-tuning hyperparameters, and incorporating longer training periods to allow the agent to learn more robust policies.
-
 # Conclusion:
+The prediction accuracy of our Hidden Markov Model is 35%, suggesting that the model makes a slight improvement over guessing market trends at random. One possible reason for this limited performance is, again, the reliance on a relatively small dataset and placeholder values, which can introduce biases and prevent the model from making accurately estimations. Increasing the size and quality of the dataset could significantly enhance the reliability of these probability estimates, ultimately leading to better predictions.\
+Our HMM also simplifies the market dynamics by restricting the feature set to price change and volume change. In reality, market behavior is shaped by many interdependent factors, and ignoring some of these relationships can lead to underperformance. Introducing additional features such as more granular historical information may provide the model with a richer context, allowing it to capture the complex interactions that drive stock movements. Similarly, using a fixed threshold to decide whether to buy, sell, or hold may not be appropriate for all stocks or market environments, so adopting adaptive thresholds could improve decision-making.\
+Another limitation arises from the Markov assumption itself, which says that the next state depends solely on the current state. This assumption often oversimplifies real-world stock behavior, as events or trends can persist beyond a single timestep or be influenced by external factors that the model does not capture. Overall, while the HMM approach offers a useful framework for capturing some aspects of temporal structure in the market, it still requires further refinement in terms of data quality, feature engineering, and modeling assumptions to achieve better predictive power.
+In the next model, we will use reinforcement learning to improve our decision-making of our model. We hope this approach will give us a better accuracy compared to the previous and this model. 
 
 
 
