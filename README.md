@@ -277,7 +277,7 @@ $$
 P(o_1,o_2 \mid s) = \frac{Count(s,o_1,o_2)}{Total count of observations in state s}
 $$
 
-## Interations and Algorithms (Model Analysis)
+### Interations and Algorithms (Model Analysis)
 
 - ***Constructor***: Initialize value of `states`, `init_prob`, `trans_prob` and `emit_prob`
 
