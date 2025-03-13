@@ -422,7 +422,7 @@ Our HMM also simplifies the market dynamics by restricting the feature set to pr
 Another limitation arises from the Markov assumption itself, which says that the next state depends solely on the current state. This assumption often oversimplifies real-world stock behavior, as events or trends can persist beyond a single timestep or be influenced by external factors that the model does not capture. Overall, while the HMM approach offers a useful framework for capturing some aspects of temporal structure in the market, it still requires further refinement in terms of data quality, feature engineering, and modeling assumptions to achieve better predictive power.
 In the next model, we will use reinforcement learning to improve our decision-making of our model. We hope this approach will give us a better accuracy compared to the previous and this model. 
 
-## Model 3: Weighted HMM Agent
+## Model 3: Reinforcement Learning Agent
 # Overview
 
 
@@ -434,6 +434,7 @@ In the next model, we will use reinforcement learning to improve our decision-ma
 # Code
 
 # Results:
+Our Reinforcement Learning Model agent achieved an overall accuracy of 42%, slightly outperforming the Hidden Markov Model and the Bayesian Network agents. This indicates that the model is also capable of capturing some aspects of the market’s behavior, though it can be improved upon. A potential factor contributing to the modest accuracy is the limited state representation, relying only on price and volume changes, which may not fully capture the complexity of market trends. Additionally, the model’s performance could be affected by the relatively small dataset and the fixed hyperparameters, such as learning rate, discount factor, and exploration rate, which may not be optimal across different stocks. Further improvements could be achieved by expanding the feature set, fine-tuning hyperparameters, and incorporating longer training periods to allow the agent to learn more robust policies.
 
 # Conclusion:
 
