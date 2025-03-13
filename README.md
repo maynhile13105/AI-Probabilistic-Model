@@ -430,4 +430,4 @@ Another limitation arises from the Markov assumption itself, which says that the
 
 
 ## Citation: 
-For this project, we did use ChatGPT to help us with the ideas for the coding parts. We asked ChatGPT to give us the ideas, and sample code so that we can implement our code based on the code samples. Also, there are some formulas that we think.
+For this project, we did use ChatGPT to help us with the ideas for the coding parts. We asked ChatGPT to give us the ideas, and sample code so that we can implement our code based on the code samples. We asked 
