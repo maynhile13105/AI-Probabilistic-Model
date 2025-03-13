@@ -252,7 +252,7 @@ The joint probability of a sequence of hidden states $$\(S_{1:T}\)$$ and observa
 $$
 P(S_{1:T} \, O_{1:T})
 = \pi_{S_1} b_{{S_1}(O_1)}
-\prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} \, b_{{S_t}(O_t)}\bigr).
+\prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} b_{{S_t}(O_t)}\bigr).
 $$
 
 ## Model variables and structure interactions
