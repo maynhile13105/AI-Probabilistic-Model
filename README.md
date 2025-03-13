@@ -250,7 +250,7 @@ Formally, let $$\(S_t\)$$ denote the hidden state at time $$\(t\)$$ and $$\(O_t\
 The joint probability of a sequence of hidden states $$\(S_{1:T}\)$$ and observations $$\(O_{1:T}\)$$ is given by:
 
 $$
-P(S_{1:T} O_{1:T})
+P(S_{1:T} \, O_{1:T})
 = \pi_{S_1} b_{{S_1}(O_1)}
 \prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} \, b_{{S_t}(O_t)}\bigr).
 $$
