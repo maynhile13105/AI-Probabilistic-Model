@@ -462,7 +462,7 @@ where:
   
 ### Structure
 
-**States**:
+**State Space $S$**:
 - The environment is represented as a finite Markov Decision Process (MDP).
 - The state representation consists of two key market indicators and each state represents a unique combination of daily price and volume changes:
   
@@ -470,7 +470,7 @@ $$
 s_t = (\text{PriceChange}_t, \text{VolumeChange}_t)
 $$
 
-**Actions**:
+**Action Space $A$**:
 
 At each time step, the agent selects an action $a_t$ from the set: 
 
@@ -478,18 +478,25 @@ $$
 a_t \in \\{Buy, Sell, Hold\\}
 $$
 
-**State Transition**:
+**Transition Probabilities $( P(s' | s, a)$**:
 
-- The action taken at time $t$ does not directly change the next state but influences the reward received.
+- It defines the probability of transitioning to a new state given a current state and action, but in this stock trading environment, state transitions are deterministic. :  
 - The transition is defined by moving from one trading day to the next:
 
 $$
 s_{t+1} = ({\text{PriceChange}_{t+1}}, {\text{VolumeChange}\_{t+1}})
 $$
 
+$$
+P(s' | s, a) = 1 
+$$
+
+for the next day's observed market state and 0 otherwise.
+
+
 **Reward Function**:
 
-- This reinforces correct trading behavior while discouraging incorrect decisions.
+This reinforces correct trading behavior while discouraging incorrect decisions.
   
 | **Action Taken** | **Actual Market Trend** | **Reward** |
 |----------------|---------------------|----------|
@@ -498,6 +505,7 @@ $$
 | Sell          | Bearish             | +1       |
 | Sell          | Bullish             | -1       |
 | Hold          | Any                 | 0        |
+
 
 ### Interations and Algorithms (Model Analysis)
 
