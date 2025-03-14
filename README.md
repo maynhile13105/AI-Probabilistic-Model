@@ -506,107 +506,147 @@ All the possible sequences of states are stored in a dictionary. The algorithm w
 # Code
 **Agent Setup**
 ```
-class HMM:
-    def __init__(self, states, init_prob, trans_prob, emit_prob):
-        self.states = states              # ['Bullish', 'Bearish', 'Neutral']
-        self.init_prob = init_prob        # Dictionary of initial probabilities
-        self.trans_prob = trans_prob      # Transition probabilities dictionary
-        self.emit_prob = emit_prob        # Emission probabilities dictionary
+# Trading Environment simulating day-by-day trading
+class TradingEnvironment:
+    def __init__(self, df):
+        self.df = df.reset_index(drop=True)
+        self.n = len(df)
+        self.current_index = 0
 
+    def reset(self):
+        self.current_index = 0
+        state = (self.df.loc[self.current_index, 'PriceChange'],
+                 self.df.loc[self.current_index, 'VolumeChange'])
+        return state
 
-    def viterbi(self, obs_seq, weights):
-        """
-        Runs the Viterbi algorithm on an observation sequence with weights.
-        obs_seq: list of observations (tuples)
-        weights: list of weights (one per observation)
-        Returns the most likely state sequence and the probability of that path.
-        """
-        V = [{}]  # V[t][state]: maximum log probability ending in state at time t.
-        path = {}
+    def step(self, action):
+        if self.current_index >= self.n - 1:
+            return None, 0, True
+        self.current_index += 1
+        next_state = (self.df.loc[self.current_index, 'PriceChange'],
+                      self.df.loc[self.current_index, 'VolumeChange'])
+        actual_trend = self.df.loc[self.current_index, 'MarketTrend']
+        reward = get_reward(action, actual_trend)
+        done = (self.current_index == self.n - 1)
+        return next_state, reward, done
 
-        # Initialization: Use the weighted log emission probability.
-        for state in self.states:
-            emit = self.emit_prob.get(state, {}).get(obs_seq[0], 1e-6)
-            V[0][state] = np.log(self.init_prob.get(state, 1e-6) + 1e-12) + weights[0] * np.log(emit + 1e-12)
-            path[state] = [state]
-
-        # Recursion: For each subsequent observation.
-        for t in range(1, len(obs_seq)):
-            V.append({})
-            new_path = {}
-            for curr_state in self.states:
-                max_prob, best_prev = max(
-                    (
-                        V[t-1][prev_state] +
-                        weights[t] * (np.log(self.trans_prob.get(prev_state, {}).get(curr_state, 1e-6) + 1e-12) +
-                                      np.log(self.emit_prob.get(curr_state, {}).get(obs_seq[t], 1e-6) + 1e-12)),
-                        prev_state
-                    )
-                    for prev_state in self.states
-                )
-                V[t][curr_state] = max_prob
-                new_path[curr_state] = path[best_prev] + [curr_state]
-            path = new_path
-
-        final_state = max(V[-1], key=V[-1].get)
-        return path[final_state], np.exp(V[-1][final_state])
-
-    def suggest_action(self, state):
-        """Suggests a trading action based on the predicted hidden state."""
-        if state == 'Bullish':
-            return 'Buy'
-        elif state == 'Bearish':
-            return 'Sell'
-        else:
-            return 'Hold'
+def get_reward(action, actual_trend):
+    if action == 'Buy':
+        return 1 if actual_trend == 'Bullish' else (-1 if actual_trend == 'Bearish' else 0)
+    elif action == 'Sell':
+        return 1 if actual_trend == 'Bearish' else (-1 if actual_trend == 'Bullish' else 0)
+    elif action == 'Hold':
+        return 0
+```
 
 ```
-**Training**
+# Mapping from MarketTrend to ideal action
+def ideal_action(market_trend):
+    if market_trend == 'Bullish':
+        return 'Buy'
+    elif market_trend == 'Bearish':
+        return 'Sell'
+    else:
+        return 'Hold'
 ```
-# Dictionary to store HMM parameters for each stock
-hmm_params = {}
-# Training model
+
+```
+# Q-Learning Hyperparameters
+alpha = 0.1       # Learning rate
+gamma = 0.95      # Discount factor
+epsilon = 0.1     # Exploration rate
+num_episodes = 100  # Training episodes per stock
+actions = ['Buy', 'Sell', 'Hold']  # Available actions
+
+results = {}  # Dictionary to store final action and accuracy per stock
+overall_correct = 0
+overall_steps = 0
+```
+
+**Training and Testing**
+```
+# Loop over each stock in the dataset
 for stock in stocks:
-    stock_df = df[df['stock'] == stock].sort_values('date')
-    n = len(stock_df)
-    train_size = int(np.floor(n * 0.8))
-    training_data = stock_df.iloc[:train_size]
+    stock_df = df[df['stock'] == stock].copy()
+    stock_df = stock_df.sort_values('date').reset_index(drop=True)
+    if len(stock_df) < 5:
+        continue
 
-    # Compute initial probabilities from the distribution of MarketTrend in training data.
-    overall_counts = training_data['MarketTrend'].value_counts().to_dict()
-    total_overall = sum(overall_counts.values())
-    init_prob = {state: count / total_overall for state, count in overall_counts.items()}
+    # Create the trading environment for the stock.
+    env = TradingEnvironment(stock_df)
 
-    # Compute transition probabilities based on consecutive MarketTrend values.
-    trans_counts = defaultdict(lambda: defaultdict(int))
-    market_trends = training_data['MarketTrend'].tolist()
-    for i in range(len(market_trends) - 1):
-        current_state = market_trends[i]
-        next_state = market_trends[i + 1]
-        trans_counts[current_state][next_state] += 1
-    trans_prob = {}
-    for state, next_counts in trans_counts.items():
-        total = sum(next_counts.values())
-        trans_prob[state] = {s: count / total for s, count in next_counts.items()}
+    # Initialize an empty Q-table for the stock.
+    Q = {}  # Q: state -> {action: Q-value}
 
-    # Compute emission probabilities for each state using observed (PriceChange, VolumeChange) tuples.
-    emit_counts = defaultdict(lambda: defaultdict(int))
-    for _, row in training_data.iterrows():
-        state = row['MarketTrend']
-        obs = (row['PriceChange'], row['VolumeChange'])
-        emit_counts[state][obs] += 1
-    emit_prob = {}
-    for state, obs_counts in emit_counts.items():
-        total = sum(obs_counts.values())
-        emit_prob[state] = {obs: count / total for obs, count in obs_counts.items()}
+    # Helper functions to get and set Q-values.
+    def get_Q(state, action):
+        if state not in Q:
+            Q[state] = {a: 0.0 for a in actions}
+        return Q[state][action]
 
-    # Save the parameters and the training size for the current stock.
-    hmm_params[stock] = {
-        'init_prob': init_prob,
-        'trans_prob': trans_prob,
-        'emit_prob': emit_prob,
-        'train_size': train_size
-    }
+    def set_Q(state, action, value):
+        if state not in Q:
+            Q[state] = {a: 0.0 for a in actions}
+        Q[state][action] = value
+
+    #Training Loop
+    for episode in range(num_episodes):
+        state = env.reset()
+        done = False
+        while not done:
+            if random.random() < epsilon:
+                action = random.choice(actions)
+            else:
+                if state not in Q:
+                    Q[state] = {a: 0.0 for a in actions}
+                action = max(Q[state], key=Q[state].get)
+            next_state, reward, done = env.step(action)
+            if next_state is not None:
+                if next_state not in Q:
+                    Q[next_state] = {a: 0.0 for a in actions}
+                best_next = max(Q[next_state].values())
+            else:
+                best_next = 0
+            old_value = get_Q(state, action)
+            new_value = old_value + alpha * (reward + gamma * best_next - old_value)
+            set_Q(state, action, new_value)
+            state = next_state
+
+    #Testing Loop
+    state = env.reset()
+    done = False
+    correct_actions = 0
+    total_steps = 0
+    last_action = None
+    print(f"\n--- Testing Policy for Stock {stock} ---")
+    while not done:
+        if state not in Q:
+            Q[state] = {a: 0.0 for a in actions}
+        action = max(Q[state], key=Q[state].get)
+        next_state, reward, done = env.step(action)
+
+        # Determine ideal action based on actual MarketTrend.
+        if env.current_index < env.n:
+            actual_trend = stock_df.loc[env.current_index, 'MarketTrend']
+            ideal = ideal_action(actual_trend)
+            if action == ideal:
+                correct_actions += 1
+        total_steps += 1
+        last_action = action
+        # Print both reward and action.
+        print(f"Action: {action}, Reward: {reward}")
+        state = next_state
+
+    accuracy = correct_actions / total_steps if total_steps > 0 else 0
+    # Accumulate overall correct and steps.
+    overall_correct += correct_actions
+    overall_steps += total_steps
+
+    # Save result
+    results[stock] = {"Final Action": last_action, "Accuracy": accuracy}
+
+    overall_accuracy = overall_correct / overall_steps if overall_steps > 0 else 0
+
 ```
 # Results:
 Our Reinforcement Learning Model agent achieved an overall accuracy of 42%, slightly outperforming the Hidden Markov Model and the Bayesian Network agents. This indicates that the model is also capable of capturing some aspects of the market’s behavior, though it can be improved upon. A potential factor contributing to the modest accuracy is the limited state representation, relying only on price and volume changes, which may not fully capture the complexity of market trends. Additionally, the model’s performance could be affected by the relatively small dataset and the fixed hyperparameters, such as learning rate, discount factor, and exploration rate, which may not be optimal across different stocks. Further improvements could be achieved by expanding the feature set, fine-tuning hyperparameters, and incorporating longer training periods to allow the agent to learn more robust policies.
