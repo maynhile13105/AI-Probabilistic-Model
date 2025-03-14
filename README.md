@@ -425,7 +425,7 @@ In the next model, we will use reinforcement learning to improve our decision-ma
 ## Model 3: Reinforcement Learning
 # Overview
 
-This model uses a Reinforcement Learning (RL) method for market prediction by leveraging Q-learning, a model-free method for learning optimal decision policies. Unlike Model 2 (HMM), which estimates hidden market states using probabilistic transitions, the Q-learning agent directly learns trading strategies by interacting with a simulated trading environment. The Q-learning agent learns through trial and error, implementing its decision policy based on past experiences. At each step, the agent observes the current market state, selects an action (either exploring randomly or exploiting learned knowledge), and receives a reward. Over multiple training rounds, the Q-values are updated using the Bellman equation, implementing the trading strategy. This Q-learning approach enables the model to adapt to changing market conditions more flexible than traditional probabilistic models like HMM.
+This model uses a Reinforcement Learning (RL) method for market prediction by leveraging Q-learning, a model-free method for learning optimal decision policies. Unlike Model 2 (HMM), which estimates hidden market states using probabilistic transitions, the Q-learning agent directly learns trading strategies by interacting with a simulated trading environment. The Q-learning agent learns through trial and error, implementing its decision policy based on past experiences. At each step, the agent observes the current market state, selects an action based on an ε-greedy policy (either exploring randomly or exploiting learned knowledge), and receives a reward. Over multiple training rounds, the Q-values are updated using the Bellman equation, implementing the trading strategy over time and converge to the optimal one. This Q-learning approach enables the model to adapt to changing market conditions more flexible than traditional probabilistic models like HMM.
 
 The agent operates in a Markov Decision Process (MDP) setting, where: 
 
@@ -453,7 +453,7 @@ where:
 
 ### Data Exploration
 - Stock: Identify the specific stock
-- Market Trend: Represent the actual trend of the stock (Bullish, Bearish, or Neutral)
+- Market Trend: Represent the actual trend of the stock (Bullish, Bearish, or Neutral), used for computing rewards, not observed directly by the agent
 - Date: Time in sequence
 - Volume Change: The observation 1
 - Price Change: The observation 2
@@ -480,7 +480,7 @@ $$
 
 **Transition Probabilities $( P(s' | s, a)$**:
 
-- It defines the probability of transitioning to a new state given a current state and action, but in this stock trading environment, state transitions are deterministic. :  
+- In this dataset-driven environment, state transitions are deterministic and follow the natural order of market data. Actions do not change state transitions but instead influence the agent’s reward and learning process.  
 - The transition is defined by moving from one trading day to the next:
 
 $$
@@ -491,12 +491,21 @@ $$
 P(s' | s, a) = 1 
 $$
 
-for the next day's observed market state and 0 otherwise.
+&emsp; &emsp;for the next day's observed market state and 0 otherwise.
 
 
 **Reward Function**:
 
-This reinforces correct trading behavior while discouraging incorrect decisions.
+This reinforces correct trading behavior while discouraging incorrect decisions:
+
+$$
+R(s, a) =
+\begin{cases} 
++1, & \text{if the action aligns with Market Trend} \\
+-1, & \text{if the action contradicts Market Trend} \\
+0,  & \text{for Hold}
+\end{cases}
+$$
   
 | **Action Taken** | **Actual Market Trend** | **Reward** |
 |----------------|---------------------|----------|
@@ -509,27 +518,33 @@ This reinforces correct trading behavior while discouraging incorrect decisions.
 
 ### Interations and Algorithms (Model Analysis)
 
-- ***Constructor***: Initialize value of `states`, `init_prob`, `trans_prob` and `emit_prob`
+- ***Constructor***: Initialize value of $Q(s, a)$ (a dictionary mapping state-action pairs to Q-values), related hyperparameters ($\alpha$, $\gamma$, $\epsilon$), `TradingEnvironment`(processes the dataset, maintain state transitions and reward assignment)
 
-- ***Viterbi Algorithm***: Infer the most probable sequence of hidden states.
+- ***Q-Learning Algorithm***: The agent iterates through episodes, continuously updating its policy.
 
-  In this algorithm, first of all, we computed the weight log probability in the first observation using the formula below:
-  
-$$
-V[0][s] = \log(\pi(s) + \epsilon) + w_0 \times \log\big(P(o_0 \mid s) + \epsilon\big)
-$$
+1. **Initializing Q-values**:
 
-   where: $\epsilon = 1e-12$ is the small value to avoid log(0) and $w_0$ is the weight of the first observation
+&emsp; &emsp;Each state-action pair starts with a Q-value of 0 if not previously visited.
 
-   Then, for each subsequent observation $o_t$ with weight $w_t$, evaluate each possible previous state $s_i$ and update to the one that we can get the maximum probability of reaching the current state $s_j$, using the formula below:
+2. **Q-Value Update** (Bellman Equation):
+
+&emsp; &emsp;The agent updates Q-values using the Bellman equation:
 
 $$
-V[t][s_j] = \max_{s_i} \big[  V[t-1][s_i] + w_t \times \big(\log(P(s_j \mid s_i) + \epsilon) + \log(P(o_t \mid s_j) + \epsilon)\big) \big]
+Q(s, a) \gets Q(s, a) + \alpha \Big( r + \gamma \max_{a'} Q(s', a') - Q(s, a) \Big)
 $$
 
-All the possible sequences of states are stored in a dictionary. The algorithm will trace back from the state with the highest probability at the final time t.
+3. **Action Selection Policy**:
 
-- ***Action Suggestion***: As model 1, this method is used to return an action suggestion which depends on the predicted future hidden states.
+&emsp; &emsp;The agent selects an action using the ε-greedy strategy:
+
+&emsp; &emsp;- With probability ϵ, explore (random action)
+
+&emsp; &emsp;- Otherwise, exploit (choose the action with the highest Q-value)
+
+
+
+***Action Suggestion***: After training, the agent applies its learned policy to new data by selecting the action with the highest Q-value for each state. The agent’s accuracy is computed by comparing its decisions with the ideal action based on actual market trends. And the Q-table provides a lookup mechanism for real-time decision-making.
 
 # Code
 **Agent Setup**
@@ -685,4 +700,4 @@ Our Q-Learning agent also simplifies market dynamics by restricting the feature 
 
 
 ## Citation: 
-For this project, we used ChatGPT to help us understand the Viterbi algorithm used in the HMM model. We also used ChatGPT to check our formulas for the joint probability of the sequence of hidden states and observation of the HMM model. 
+For this project, we used ChatGPT to help us understand the Viterbi algorithm used in the HMM model. We also used ChatGPT to check our formulas for the joint probability of the sequence of hidden states and observation of the HMM model and Q-learning Model.
