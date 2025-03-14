@@ -460,7 +460,7 @@ where:
 - Action: The decision taken by the agent (Buy, Sell, Hold)
 - Reward: The feedback the agent receives based on the correctness of its action
 
-![image](https://github.com/user-attachments/assets/aaf0860f-d409-45d6-9883-5bc69652f0bb)
+![image](https://github.com/user-attachments/assets/6d9f3d55-2d03-43b9-a185-91b94c4e8125)
 
 ### Structure
 
