@@ -460,11 +460,17 @@ where:
 - Action: The decision taken by the agent (Buy, Sell, Hold)
 - Reward: The feedback the agent receives based on the correctness of its action
   
-The state representation is defined as:
+### Structure
 
+**States**:
+- The environment is represented as a finite Markov Decision Process (MDP).
+- The state representation consists of two key market indicators and each state represents a unique combination of daily price and volume changes:
+  
 $$
 s_t = (\text{PriceChange}_t, \text{VolumeChange}_t)
 $$
+
+**Actions**:
 
 At each time step, the agent selects an action $a_t$ from the set: 
 
@@ -472,7 +478,19 @@ $$
 a_t \in \\{Buy, Sell, Hold\\}
 $$
 
-**Reward System**:
+**State Transition**:
+
+- The action taken at time $t$ does not directly change the next state but influences the reward received.
+- The transition is defined by moving from one trading day to the next:
+
+$$
+s_{t+1} = ({\text{PriceChange}_{t+1}}, {\text{VolumeChange}\_{t+1}})
+$$
+
+**Reward Function**:
+
+- This reinforces correct trading behavior while discouraging incorrect decisions.
+  
 | **Action Taken** | **Actual Market Trend** | **Reward** |
 |----------------|---------------------|----------|
 | Buy           | Bullish             | +1       |
@@ -480,24 +498,6 @@ $$
 | Sell          | Bearish             | +1       |
 | Sell          | Bullish             | -1       |
 | Hold          | Any                 | 0        |
-### Structure
-- ***Hidden states `states`:*** Market trend ("Bullish", "Bearish", "Neutral")
-- ***Observations***: Pair of PriceChange and VolumeChange
-- ***Initial Probabilities `init_prob`***: represent the probability of each state at the beginning. This kind of probability is computed by finding the frequency of each state `s` in the training data
-  
-$$\verb|init_prob[s]| = \pi(s) = \frac{\text{Number of } s}{\text{Total observations}}$$
-
-- ***Transition Probabilities `trans_prob`***: represent the probability of the transition from state $s_i$ to state $s_j$. This kind of probability is computed by counting consecutive occurrences of market trends in the training set.
-
-$$
-\verb|trans\_prob[s_i][s_j]| = P(s_j \mid s_i) = \frac{\text{Count}(s_i \to s_j)}{\sum_{s'} \text{Count}(s_i \to s')}
-$$
-
-- ***Emission Probabilities `emit_prob`***: represent the probability distribution over the possible observations. This is computed by counting the frequency of the appearances of state `s` and each tuple ($o_1,o_2$) as `o`(represents for tuple (PriceChange, VolumeChange))
-
-$$
-\verb|emit\_prob[s][o]| = P(o \mid s) = \frac{Count(s,o)}{\text{Total observations in state s}}
-$$
 
 ### Interations and Algorithms (Model Analysis)
 
