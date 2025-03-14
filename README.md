@@ -425,6 +425,28 @@ In the next model, we will use reinforcement learning to improve our decision-ma
 ## Model 3: Reinforcement Learning Agent
 # Overview
 
+This model uses a Reinforcement Learning (RL) method for market prediction by leveraging Q-learning, a model-free method for learning optimal decision policies. Unlike Model 2 (HMM), which estimates hidden market states using probabilistic transitions, the Q-learning agent directly learns trading strategies by interacting with a simulated trading environment. The Q-learning agent learns through trial and error, implementing its decision policy based on past experiences. At each step, the agent observes the current market state, selects an action (either exploring randomly or exploiting learned knowledge), and receives a reward. Over multiple training rounds, the Q-values are updated using the Bellman equation, implementing the trading strategy. This Q-learning approach enables the model to adapt to changing market conditions more flexible than traditional probabilistic models like HMM.
+
+The agent operates in a Markov Decision Process (MDP) setting, where: 
+
+- State: Discrete values of `PriceChange` and `VolumeChange`
+- Action: Buy, Sell, Hold
+- Reward: Assigned based on the correctness compare to actual market trends
+
+The agent uses a Q-table that stores the expected cumulative reward for each state-action pair:
+
+
+$$Q(s, a) \gets Q(s, a) + \alpha \Big( r + \gamma \max_{a'} Q(s', a') - Q(s, a) \Big)$$
+
+where:
+
+- $Q(s, a)$ as the current Q-value for state $s$ and action $a$
+- $\alpha$ as the learning rate for how much to override old values
+- $\gamma$ as the discount factor for weighting future rewards
+- $r$ as the reward
+- $\max_{a'} Q(s', a')$ as the maximum expected future reward from the next state $s'$
+
+
 
 
 ## Model variables and structure interactions
