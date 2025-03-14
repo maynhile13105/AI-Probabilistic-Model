@@ -453,13 +453,33 @@ where:
 
 ### Data Exploration
 - Stock: Identify the specific stock
-- Market Trend: Hidden state in model
+- Market Trend: Represent the actual trend of the stock (Bullish, Bearish, or Neutral)
 - Date: Time in sequence
 - Volume Change: The observation 1
 - Price Change: The observation 2
+- Action: The decision taken by the agent (Buy, Sell, Hold)
+- Reward: The feedback the agent receives based on the correctness of its action
   
-![image](https://github.com/user-attachments/assets/70a2bd1a-9ca1-4d76-9366-dbc8d698565a)
+The state representation is defined as:
 
+$$
+s_t = (\text{PriceChange}_t, \text{VolumeChange}_t)
+$$
+
+At each time step, the agent selects an action $a_t$ from the set: 
+
+$$
+a_t \in \\{Buy, Sell, Hold\\}
+$$
+
+**Reward System**:
+| **Action Taken** | **Actual Market Trend** | **Reward** |
+|----------------|---------------------|----------|
+| Buy           | Bullish             | +1       |
+| Buy           | Bearish             | -1       |
+| Sell          | Bearish             | +1       |
+| Sell          | Bullish             | -1       |
+| Hold          | Any                 | 0        |
 ### Structure
 - ***Hidden states `states`:*** Market trend ("Bullish", "Bearish", "Neutral")
 - ***Observations***: Pair of PriceChange and VolumeChange
