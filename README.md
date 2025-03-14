@@ -459,7 +459,9 @@ where:
 - Price Change: The observation 2
 - Action: The decision taken by the agent (Buy, Sell, Hold)
 - Reward: The feedback the agent receives based on the correctness of its action
-  
+
+![image](https://github.com/user-attachments/assets/aaf0860f-d409-45d6-9883-5bc69652f0bb)
+
 ### Structure
 
 **State Space $S$**:
