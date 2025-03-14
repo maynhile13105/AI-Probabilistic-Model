@@ -285,7 +285,7 @@ $$
 \verb|emit\_prob[s][o]| = P(o \mid s) = \frac{Count(s,o)}{\text{Total observations in state s}}
 $$
 
-### Interations and Algorithms (Model Analysis)
+### Interactions and Algorithms (Model Analysis)
 
 - ***Constructor***: Initialize value of `states`, `init_prob`, `trans_prob` and `emit_prob`
 
@@ -516,7 +516,7 @@ $$
 | Hold          | Any                 | 0        |
 
 
-### Interations and Algorithms (Model Analysis)
+### Interactions and Algorithms (Model Analysis)
 
 - ***Constructor***: Initialize value of $Q(s, a)$ (a dictionary mapping state-action pairs to Q-values), related hyperparameters ($\alpha$, $\gamma$, $\epsilon$), `TradingEnvironment`(processes the dataset, maintain state transitions and reward assignment)
 
