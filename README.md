@@ -702,4 +702,10 @@ Our Q-Learning agent also simplifies market dynamics by restricting the feature 
 
 
 ## Citation: 
-For this project, we used ChatGPT to help us understand the Viterbi algorithm used in the HMM model. We also used ChatGPT to check our formulas for the joint probability of the sequence of hidden states and observation of the HMM model and Q-learning Model.
+For this project, we used ChatGPT to help us understand the Viterbi algorithm used in our HMM model.
+
+We also used ChatGPT to check our formulas for the joint probability of the sequence of hidden states and observation of the HMM model 
+
+ChatGPT also helps us understand the Q-Learning Model.
+
+We also use chatGPT to check our logic for each models and correct the syntax.
