@@ -141,7 +141,7 @@ The data for each of these columns is from converting the continuous values of '
 - MarketTrend: determined using percent_change_next_weeks_price, labeling it as "Bearish" if below -1.5, "Bullish" if above 1.5, and "Neutral" otherwise.
 
 ## Model 1: Bayesian Network
-**Overview**
+# Overview
 
 This model uses the dataset to compute the probability of each kind of Market Trend of each stock given the Volume Change (in categorical) and the Price Change (in categorical). Formula:
 
@@ -151,7 +151,8 @@ $$
 
 Then, when the user gives the Volume and Price Change (in categorical) and asks the agent to suggest selling/buying/holding stock, the model will try to find the market trend of this stock based on the probability and give the user a suggestion.
 
-**Code**
+# Code
+**Agent Setup**
 ```
 class BayesianNetwork:
     def __init__(self, nodes):
@@ -216,10 +217,489 @@ class BayesianNetwork:
       else:
         return 'Hold'
 ```
+**Training**
+```
+# Training model
+# Define nodes: Market trend prediction
+nodes = ["MarketTrend", "VolumeChange", "PriceChange"]
+# Create Bayesian Network
+bn = BayesianNetwork(nodes)
+# Define dependencies
+bn.add_edge("VolumeChange", "MarketTrend")
+bn.add_edge("PriceChange", "MarketTrend")
+
+# Assign CPTs for each stock
+for stock, cpt in cpt_transformed.items():
+  bn.set_cpt(stock, cpt)
+```
 # Results:
-## Model 1: Bayesian Network
 
 Currently, our agent only has 41.33% accuracy. We think this accuracy is not too high because we assumed that the price change and the volume change are independent. Also, when we converted the volume change, the price change, and the real market trend from numerical to categorical, we used the threshold is 1.5, which is not the most efficient for this model. We think we could improve our model if we have a larger dataset to train and test this model as well as we could try to figure out the most efficient threshold for standardizing. 
 # Conclusion:
-## Model 1: Bayesian Network
+
 The prediction accuracy of our Naive Bayes model is 41.333%, demonstrating that the model is an improvement over guessing stock trends at random, but not by very much. Perhaps we would have to find an alternative method to clean the data instead of using placeholder values.  We can also improve our agent with a bigger dataset and more features. Our agent can have more historical stock data with more data in our dataset. With the improvement of the historical stock data, the agent can calculate the probability more accurately and more reliably. Improving our features would also make our agent more reliable because our current agent is oversimplifying the market dynamic by assuming the price change and volume change are independent. By having more features, we can improve our agent’s structure which also boosts the accuracy of our agent. There are many challenges that our agent can have, one of them is the independence assumption. Since this is our first agent, we are assuming the volume change and the price change are independent. But in the real world, these features are correlated, and ignoring the relationship can lead to the underperformance of our agent. With the limitation of our dataset, our agent will be overfitting and have bad predictions, which can lead to poor decision-making. Also, using a fixed threshold is not optimal for all types of stocks, which can also lead to bad output for our agent.
+## Model 2: HMM
+# Overview
+This model uses a Hidden Markov Model (HMM) to capture the temporal dependencies in stock market behavior. We define three hidden states—Bullish, Bearish, and Neutral—to represent the underlying market conditions, and we estimate the transition probabilities between these states based on historical data. We also compute emission probabilities that describe how likely we are to observe certain price and volume changes when the market is in a particular hidden state. Once the HMM is trained, it uses these transition and emission probabilities to infer the most probable sequence of hidden states for any new set of observed price and volume changes. Based on the inferred market state, the agent then provides a recommendation to buy, sell, or hold the stock.
+Formally, let $$\(S_t\)$$ denote the hidden state at time $$\(t\)$$ and $$\(O_t\)$$ the observation (price change and volume change) at time $$\(t\)$$. We specify three key components:
+
+- The initial state distribution $$\pi_i = P(S_1 = i)$$
+- The transition probabilities $$a_{ij}$$ = $$P(S_{t+1}$$ = $$j \mid S_t = i)$$
+- The emission probabilities $$b_{i(O_t)}$$ = $$P(O_t \mid S_t = i)$$
+
+The joint probability of a sequence of hidden states $$\(S_{1:T}\)$$ and observations $$\(O_{1:T}\)$$ is given by:
+
+$$
+P(S_{1:T} \, O_{1:T})
+= \pi_{S_1} b_{{S_1}(O_1)}
+\prod_{t=2}^{T} \bigl(a_{S_{t-1}, S_t} b_{{S_t}(O_t)}\bigr).
+$$
+
+## Model variables and structure interactions
+
+### Data Exploration
+- Stock: Identify the specific stock
+- Market Trend: Hidden state in model
+- Date: Time in sequence
+- Volume Change: The observation 1
+- Price Change: The observation 2
+  
+![image](https://github.com/user-attachments/assets/70a2bd1a-9ca1-4d76-9366-dbc8d698565a)
+
+### Structure
+- ***Hidden states `states`:*** Market trend ("Bullish", "Bearish", "Neutral")
+- ***Observations***: Pair of PriceChange and VolumeChange
+- ***Initial Probabilities `init_prob`***: represent the probability of each state at the beginning. This kind of probability is computed by finding the frequency of each state `s` in the training data
+  
+$$\verb|init_prob[s]| = \pi(s) = \frac{\text{Number of } s}{\text{Total observations}}$$
+
+- ***Transition Probabilities `trans_prob`***: represent the probability of the transition from state $s_i$ to state $s_j$. This kind of probability is computed by counting consecutive occurrences of market trends in the training set.
+
+$$
+\verb|trans\_prob[s_i][s_j]| = P(s_j \mid s_i) = \frac{\text{Count}(s_i \to s_j)}{\sum_{s'} \text{Count}(s_i \to s')}
+$$
+
+- ***Emission Probabilities `emit_prob`***: represent the probability distribution over the possible observations. This is computed by counting the frequency of the appearances of state `s` and each tuple ($o_1,o_2$) as `o`(represents for tuple (PriceChange, VolumeChange))
+
+$$
+\verb|emit\_prob[s][o]| = P(o \mid s) = \frac{Count(s,o)}{\text{Total observations in state s}}
+$$
+
+### Interactions and Algorithms (Model Analysis)
+
+- ***Constructor***: Initialize value of `states`, `init_prob`, `trans_prob` and `emit_prob`
+
+- ***Viterbi Algorithm***: Infer the most probable sequence of hidden states.
+
+  In this algorithm, first of all, we computed the weight log probability in the first observation using the formula below:
+  
+$$
+V[0][s] = \log(\pi(s) + \epsilon) + w_0 \times \log\big(P(o_0 \mid s) + \epsilon\big)
+$$
+
+   where: $\epsilon = 1e-12$ is the small value to avoid log(0) and $w_0$ is the weight of the first observation
+
+   Then, for each subsequent observation $o_t$ with weight $w_t$, evaluate each possible previous state $s_i$ and update to the one that we can get the maximum probability of reaching the current state $s_j$, using the formula below:
+
+$$
+V[t][s_j] = \max_{s_i} \big[  V[t-1][s_i] + w_t \times \big(\log(P(s_j \mid s_i) + \epsilon) + \log(P(o_t \mid s_j) + \epsilon)\big) \big]
+$$
+
+All the possible sequences of states are stored in a dictionary. The algorithm will trace back from the state with the highest probability at the final time t.
+
+- ***Action Suggestion***: As model 1, this method is used to return an action suggestion which depends on the predicted future hidden states.
+
+# Code
+**Agent Setup**
+```
+class HMM:
+    def __init__(self, states, init_prob, trans_prob, emit_prob):
+        self.states = states              # ['Bullish', 'Bearish', 'Neutral']
+        self.init_prob = init_prob        # Dictionary of initial probabilities
+        self.trans_prob = trans_prob      # Transition probabilities dictionary
+        self.emit_prob = emit_prob        # Emission probabilities dictionary
+
+
+    def viterbi(self, obs_seq, weights):
+        """
+        Runs the Viterbi algorithm on an observation sequence with weights.
+        obs_seq: list of observations (tuples)
+        weights: list of weights (one per observation)
+        Returns the most likely state sequence and the probability of that path.
+        """
+        V = [{}]  # V[t][state]: maximum log probability ending in state at time t.
+        path = {}
+
+        # Initialization: Use the weighted log emission probability.
+        for state in self.states:
+            emit = self.emit_prob.get(state, {}).get(obs_seq[0], 1e-6)
+            V[0][state] = np.log(self.init_prob.get(state, 1e-6) + 1e-12) + weights[0] * np.log(emit + 1e-12)
+            path[state] = [state]
+
+        # Recursion: For each subsequent observation.
+        for t in range(1, len(obs_seq)):
+            V.append({})
+            new_path = {}
+            for curr_state in self.states:
+                max_prob, best_prev = max(
+                    (
+                        V[t-1][prev_state] +
+                        weights[t] * (np.log(self.trans_prob.get(prev_state, {}).get(curr_state, 1e-6) + 1e-12) +
+                                      np.log(self.emit_prob.get(curr_state, {}).get(obs_seq[t], 1e-6) + 1e-12)),
+                        prev_state
+                    )
+                    for prev_state in self.states
+                )
+                V[t][curr_state] = max_prob
+                new_path[curr_state] = path[best_prev] + [curr_state]
+            path = new_path
+
+        final_state = max(V[-1], key=V[-1].get)
+        return path[final_state], np.exp(V[-1][final_state])
+
+    def suggest_action(self, state):
+        """Suggests a trading action based on the predicted hidden state."""
+        if state == 'Bullish':
+            return 'Buy'
+        elif state == 'Bearish':
+            return 'Sell'
+        else:
+            return 'Hold'
+
+```
+**Training**
+```
+# Dictionary to store HMM parameters for each stock
+hmm_params = {}
+# Training model
+for stock in stocks:
+    stock_df = df[df['stock'] == stock].sort_values('date')
+    n = len(stock_df)
+    train_size = int(np.floor(n * 0.8))
+    training_data = stock_df.iloc[:train_size]
+
+    # Compute initial probabilities from the distribution of MarketTrend in training data.
+    overall_counts = training_data['MarketTrend'].value_counts().to_dict()
+    total_overall = sum(overall_counts.values())
+    init_prob = {state: count / total_overall for state, count in overall_counts.items()}
+
+    # Compute transition probabilities based on consecutive MarketTrend values.
+    trans_counts = defaultdict(lambda: defaultdict(int))
+    market_trends = training_data['MarketTrend'].tolist()
+    for i in range(len(market_trends) - 1):
+        current_state = market_trends[i]
+        next_state = market_trends[i + 1]
+        trans_counts[current_state][next_state] += 1
+    trans_prob = {}
+    for state, next_counts in trans_counts.items():
+        total = sum(next_counts.values())
+        trans_prob[state] = {s: count / total for s, count in next_counts.items()}
+
+    # Compute emission probabilities for each state using observed (PriceChange, VolumeChange) tuples.
+    emit_counts = defaultdict(lambda: defaultdict(int))
+    for _, row in training_data.iterrows():
+        state = row['MarketTrend']
+        obs = (row['PriceChange'], row['VolumeChange'])
+        emit_counts[state][obs] += 1
+    emit_prob = {}
+    for state, obs_counts in emit_counts.items():
+        total = sum(obs_counts.values())
+        emit_prob[state] = {obs: count / total for obs, count in obs_counts.items()}
+
+    # Save the parameters and the training size for the current stock.
+    hmm_params[stock] = {
+        'init_prob': init_prob,
+        'trans_prob': trans_prob,
+        'emit_prob': emit_prob,
+        'train_size': train_size
+    }
+```
+# Results:
+Our Hidden Markov Model agent achieved an overall accuracy of 35%. While this suggests that the model is capturing some aspects of the underlying market dynamics, there is still room for improvement. One possible reason for the modest accuracy is the reliance on a limited feature set and a relatively small dataset, which can prevent the model from learning robust transition and emission probabilities. Additionally, the thresholds used to categorize price and volume changes may not be optimal for all stocks or market conditions. By refining these thresholds, incorporating more relevant features, and training on a larger dataset, we believe the agent’s accuracy could be improved.
+# Conclusion:
+The prediction accuracy of our Hidden Markov Model is 35%, suggesting that the model makes a slight improvement over guessing market trends at random. One possible reason for this limited performance is, again, the reliance on a relatively small dataset and placeholder values, which can introduce biases and prevent the model from making accurately estimations. Increasing the size and quality of the dataset could significantly enhance the reliability of these probability estimates, ultimately leading to better predictions.\
+Our HMM also simplifies the market dynamics by restricting the feature set to price change and volume change. In reality, market behavior is shaped by many interdependent factors, and ignoring some of these relationships can lead to underperformance. Introducing additional features such as more granular historical information may provide the model with a richer context, allowing it to capture the complex interactions that drive stock movements. Similarly, using a fixed threshold to decide whether to buy, sell, or hold may not be appropriate for all stocks or market environments, so adopting adaptive thresholds could improve decision-making.\
+Another limitation arises from the Markov assumption itself, which says that the next state depends solely on the current state. This assumption often oversimplifies real-world stock behavior, as events or trends can persist beyond a single timestep or be influenced by external factors that the model does not capture. Overall, while the HMM approach offers a useful framework for capturing some aspects of temporal structure in the market, it still requires further refinement in terms of data quality, feature engineering, and modeling assumptions to achieve better predictive power.
+In the next model, we will use reinforcement learning to improve our decision-making of our model. We hope this approach will give us a better accuracy compared to the previous and this model. 
+
+## Model 3: Reinforcement Learning
+# Overview
+
+This model uses a Reinforcement Learning (RL) method for market prediction by leveraging Q-learning, a model-free method for learning optimal decision policies. Unlike Model 2 (HMM), which estimates hidden market states using probabilistic transitions, the Q-learning agent directly learns trading strategies by interacting with a simulated trading environment. The Q-learning agent learns through trial and error, implementing its decision policy based on past experiences. At each step, the agent observes the current market state, selects an action based on an ε-greedy policy (either exploring randomly or exploiting learned knowledge), and receives a reward. Over multiple training rounds, the Q-values are updated using the Bellman equation, implementing the trading strategy over time and converge to the optimal one. This Q-learning approach enables the model to adapt to changing market conditions more flexible than traditional probabilistic models like HMM.
+
+The agent operates in a Markov Decision Process (MDP) setting, where: 
+
+- State: Discrete values of `PriceChange` and `VolumeChange`
+- Action: Buy, Sell, Hold
+- Reward: Assigned based on the correctness compare to actual market trends
+
+The agent uses a Q-table that stores the expected cumulative reward for each state-action pair:
+
+
+$$Q(s, a) \gets Q(s, a) + \alpha \Big( r + \gamma \max_{a'} Q(s', a') - Q(s, a) \Big)$$
+
+where:
+
+- $Q(s, a)$ as the current Q-value for state $s$ and action $a$
+- $\alpha$ as the learning rate for how much to override old values
+- $\gamma$ as the discount factor for weighting future rewards
+- $r$ as the reward
+- $\max_{a'} Q(s', a')$ as the maximum expected future reward from the next state $s'$
+
+
+
+
+## Model variables and structure interactions
+
+### Data Exploration
+- Stock: Identify the specific stock
+- Market Trend: Represent the actual trend of the stock (Bullish, Bearish, or Neutral), used for computing rewards, not observed directly by the agent
+- Date: Time in sequence
+- Volume Change: The observation 1
+- Price Change: The observation 2
+- Action: The decision taken by the agent (Buy, Sell, Hold)
+- Reward: The feedback the agent receives based on the correctness of its action
+
+![image](https://github.com/user-attachments/assets/6d9f3d55-2d03-43b9-a185-91b94c4e8125)
+
+### Structure
+
+**State Space $S$**:
+- The environment is represented as a finite Markov Decision Process (MDP).
+- The state representation consists of two key market indicators and each state represents a unique combination of daily price and volume changes:
+  
+$$
+s_t = (\text{PriceChange}_t, \text{VolumeChange}_t)
+$$
+
+**Action Space $A$**:
+
+At each time step, the agent selects an action $a_t$ from the set: 
+
+$$
+a_t \in \\{Buy, Sell, Hold\\}
+$$
+
+**Transition Probabilities $( P(s' | s, a)$**:
+
+- In this dataset-driven environment, state transitions are deterministic and follow the natural order of market data. Actions do not change state transitions but instead influence the agent’s reward and learning process.  
+- The transition is defined by moving from one trading day to the next:
+
+$$
+s_{t+1} = ({\text{PriceChange}_{t+1}}, {\text{VolumeChange}\_{t+1}})
+$$
+
+$$
+P(s' | s, a) = 1 
+$$
+
+&emsp; &emsp;for the next day's observed market state and 0 otherwise.
+
+
+**Reward Function**:
+
+This reinforces correct trading behavior while discouraging incorrect decisions:
+
+$$
+R(s, a) =
+\begin{cases} 
++1, & \text{if the action aligns with Market Trend} \\
+-1, & \text{if the action contradicts Market Trend} \\
+0,  & \text{for Hold}
+\end{cases}
+$$
+  
+| **Action Taken** | **Actual Market Trend** | **Reward** |
+|----------------|---------------------|----------|
+| Buy           | Bullish             | +1       |
+| Buy           | Bearish             | -1       |
+| Sell          | Bearish             | +1       |
+| Sell          | Bullish             | -1       |
+| Hold          | Any                 | 0        |
+
+
+### Interactions and Algorithms (Model Analysis)
+
+- ***Constructor***: Initialize value of $Q(s, a)$ (a dictionary mapping state-action pairs to Q-values), related hyperparameters ($\alpha$, $\gamma$, $\epsilon$), `TradingEnvironment`(processes the dataset, maintain state transitions and reward assignment)
+
+- ***Q-Learning Algorithm***: The agent iterates through episodes, continuously updating its policy.
+
+1. **Initializing Q-values**:
+
+&emsp; &emsp;Each state-action pair starts with a Q-value of 0 if not previously visited.
+
+2. **Q-Value Update** (Bellman Equation):
+
+&emsp; &emsp;The agent updates Q-values using the Bellman equation:
+
+$$
+Q(s, a) \gets Q(s, a) + \alpha \Big( r + \gamma \max_{a'} Q(s', a') - Q(s, a) \Big)
+$$
+
+3. **Action Selection Policy**:
+
+&emsp; &emsp;The agent selects an action using the ε-greedy strategy:
+
+&emsp; &emsp;- With probability ϵ, explore (random action)
+
+&emsp; &emsp;- Otherwise, exploit (choose the action with the highest Q-value)
+
+
+
+***Action Suggestion***: After training, the agent applies its learned policy to new data by selecting the action with the highest Q-value for each state. The agent’s accuracy is computed by comparing its decisions with the ideal action based on actual market trends. And the Q-table provides a lookup mechanism for real-time decision-making.
+
+# Code
+**Agent Setup**
+```
+# Trading Environment simulating day-by-day trading
+class TradingEnvironment:
+    def __init__(self, df):
+        self.df = df.reset_index(drop=True)
+        self.n = len(df)
+        self.current_index = 0
+
+    def reset(self):
+        self.current_index = 0
+        state = (self.df.loc[self.current_index, 'PriceChange'],
+                 self.df.loc[self.current_index, 'VolumeChange'])
+        return state
+
+    def step(self, action):
+        if self.current_index >= self.n - 1:
+            return None, 0, True
+        self.current_index += 1
+        next_state = (self.df.loc[self.current_index, 'PriceChange'],
+                      self.df.loc[self.current_index, 'VolumeChange'])
+        actual_trend = self.df.loc[self.current_index, 'MarketTrend']
+        reward = get_reward(action, actual_trend)
+        done = (self.current_index == self.n - 1)
+        return next_state, reward, done
+
+def get_reward(action, actual_trend):
+    if action == 'Buy':
+        return 1 if actual_trend == 'Bullish' else (-1 if actual_trend == 'Bearish' else 0)
+    elif action == 'Sell':
+        return 1 if actual_trend == 'Bearish' else (-1 if actual_trend == 'Bullish' else 0)
+    elif action == 'Hold':
+        return 0
+```
+
+```
+# Mapping from MarketTrend to ideal action
+def ideal_action(market_trend):
+    if market_trend == 'Bullish':
+        return 'Buy'
+    elif market_trend == 'Bearish':
+        return 'Sell'
+    else:
+        return 'Hold'
+```
+
+```
+# Q-Learning Hyperparameters
+alpha = 0.1       # Learning rate
+gamma = 0.95      # Discount factor
+epsilon = 0.1     # Exploration rate
+num_episodes = 100  # Training episodes per stock
+actions = ['Buy', 'Sell', 'Hold']  # Available actions
+
+results = {}  # Dictionary to store final action and accuracy per stock
+overall_correct = 0
+overall_steps = 0
+```
+
+**Training and Testing**
+```
+# Loop over each stock in the dataset
+for stock in stocks:
+    stock_df = df[df['stock'] == stock].copy()
+    stock_df = stock_df.sort_values('date').reset_index(drop=True)
+    if len(stock_df) < 5:
+        continue
+
+    # Create the trading environment for the stock.
+    env = TradingEnvironment(stock_df)
+
+    # Initialize an empty Q-table for the stock.
+    Q = {}  # Q: state -> {action: Q-value}
+
+    # Helper functions to get and set Q-values.
+    def get_Q(state, action):
+        if state not in Q:
+            Q[state] = {a: 0.0 for a in actions}
+        return Q[state][action]
+
+    def set_Q(state, action, value):
+        if state not in Q:
+            Q[state] = {a: 0.0 for a in actions}
+        Q[state][action] = value
+
+    #Training Loop
+    for episode in range(num_episodes):
+        state = env.reset()
+        done = False
+        while not done:
+            if random.random() < epsilon:
+                action = random.choice(actions)
+            else:
+                if state not in Q:
+                    Q[state] = {a: 0.0 for a in actions}
+                action = max(Q[state], key=Q[state].get)
+            next_state, reward, done = env.step(action)
+            if next_state is not None:
+                if next_state not in Q:
+                    Q[next_state] = {a: 0.0 for a in actions}
+                best_next = max(Q[next_state].values())
+            else:
+                best_next = 0
+            old_value = get_Q(state, action)
+            new_value = old_value + alpha * (reward + gamma * best_next - old_value)
+            set_Q(state, action, new_value)
+            state = next_state
+
+    #Testing Loop
+    state = env.reset()
+    done = False
+    correct_actions = 0
+    total_steps = 0
+    last_action = None
+    print(f"\n--- Testing Policy for Stock {stock} ---")
+    while not done:
+        if state not in Q:
+            Q[state] = {a: 0.0 for a in actions}
+        action = max(Q[state], key=Q[state].get)
+        next_state, reward, done = env.step(action)
+
+        # Determine ideal action based on actual MarketTrend.
+        if env.current_index < env.n:
+            actual_trend = stock_df.loc[env.current_index, 'MarketTrend']
+            ideal = ideal_action(actual_trend)
+            if action == ideal:
+                correct_actions += 1
+        total_steps += 1
+        last_action = action
+        # Print both reward and action.
+        print(f"Action: {action}, Reward: {reward}")
+        state = next_state
+
+    accuracy = correct_actions / total_steps if total_steps > 0 else 0
+    # Accumulate overall correct and steps.
+    overall_correct += correct_actions
+    overall_steps += total_steps
+
+    # Save result
+    results[stock] = {"Final Action": last_action, "Accuracy": accuracy}
+
+    overall_accuracy = overall_correct / overall_steps if overall_steps > 0 else 0
+
+```
+# Results:
+Our Reinforcement Learning Model agent achieved an overall accuracy of 42%, slightly outperforming the Hidden Markov Model and the Bayesian Network agents. This indicates that the model is also capable of capturing some aspects of the market’s behavior, though it can be improved upon. A potential factor contributing to the modest accuracy is the limited state representation, relying only on price and volume changes, which may not fully capture the complexity of market trends. Additionally, the model’s performance could be affected by the relatively small dataset and the fixed hyperparameters, such as learning rate, discount factor, and exploration rate, which may not be optimal across different stocks. Further improvements could be achieved by expanding the feature set, fine-tuning hyperparameters, and incorporating longer training periods to allow the agent to learn more robust policies.
+# Conclusion:
+The prediction accuracy of our Q-Learning Model is 42.9%, suggesting that the model makes a slightly significant improvement over guessing market trends at random. One possible reason for this limited performance is, again, the reliance on a relatively small dataset and placeholder values, which can introduce biases and prevent the model from making estimations accurately. Increasing the size and quality of the dataset could significantly enhance the reliability of these probability estimates, ultimately leading to better predictions.\
+Our Q-Learning agent also simplifies market dynamics by restricting the feature set to price change and volume change. In reality, market behavior is shaped by many interdependent factors, and ignoring some of these relationships can lead to underperformance. Introducing additional features, such as more granular historical information or sentiment analysis, may provide the model with a richer context, allowing it to capture the complex interactions that drive stock movements. Similarly, using fixed hyperparameters like the learning rate, discount factor, and exploration rate may not be optimal for all stocks or market environments, so adopting adaptive parameters could improve decision-making.
+
+
+
+## Citation: 
+For this project, we used ChatGPT to help us understand the Viterbi algorithm used in the HMM model. We also used ChatGPT to check our formulas for the joint probability of the sequence of hidden states and observation of the HMM model and Q-learning Model.
